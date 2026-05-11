@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Visualisasi Diagram Sistem SIMPEG</title>
+    <script src="https://cdn.jsdelivr.net/npm/mermaid/dist/mermaid.min.js"></script>
+    <script>
+        mermaid.initialize({ 
+            startOnLoad: true,
+            theme: 'default',
+            securityLevel: 'loose',
+            flowchart: { useMaxWidth: true, htmlLabels: true, curve: 'basis' }
+        });
+    </script>
+    <style>
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; line-height: 1.6; color: #333; max-width: 1000px; margin: 0 auto; padding: 40px; background: #f4f7f9; }
+        .card { background: white; padding: 30px; border-radius: 15px; box-shadow: 0 4px 20px rgba(0,0,0,0.08); margin-bottom: 40px; }
+        h1 { color: #1e293b; text-align: center; margin-bottom: 50px; }
+        h2 { color: #334155; border-left: 5px solid #3b82f6; padding-left: 15px; margin-bottom: 25px; }
+        .mermaid { background: white; padding: 20px; border-radius: 8px; display: flex; justify-content: center; }
+        .info { background: #e0f2fe; padding: 15px; border-radius: 8px; color: #0369a1; font-size: 0.9em; margin-bottom: 20px; }
+    </style>
+</head>
+<body>
+
+    <h1>Dashboard Visualisasi Sistem SIMPEG</h1>
+    
+    <div class="info">
+        <strong>Tips:</strong> Untuk menggunakan di PPT, Anda bisa melakukan <b>Klik Kanan -> Save Image As</b> (jika browser mendukung) atau gunakan <b>Snipping Tool / Screenshot</b> pada diagram di bawah ini.
+    </div>
+
+    <!-- DFD Level 0 -->
+    <div class="card">
+        <h2>1. Data Flow Diagram (DFD) - Level 0</h2>
+        <div class="mermaid">
+            graph LR
+                P[Pegawai] -- Data Pribadi & Dokumen --> S((SIMPEG))
+                A[Admin] -- Data Pegawai & Konfigurasi --> S
+                L[Pimpinan] -- Keputusan Approval --> S
+                
+                S -- Notifikasi & Progres --> P
+                S -- Laporan & Reminder --> A
+                S -- Statistik & Daftar Approval --> L
+        </div>
+    </div>
+
+    <!-- DFD Level 1 -->
+    <div class="card">
+        <h2>2. Data Flow Diagram (DFD) - Level 1</h2>
+        <div class="mermaid">
+            graph TD
+                User((User)) --> P1[Proses 1: Login & Autentikasi]
+                P1 --> DB[(User Storage)]
+                
+                subgraph "Dashboard & Monitoring"
+                    P2[Proses 2: Tracking Pangkat & KGB]
+                    P3[Proses 3: Notifikasi Reminder]
+                end
+                
+                subgraph "Administrasi"
+                    P4[Proses 4: Pengelolaan Data Pegawai]
+                    P5[Proses 5: Workflow Approval]
+                end
+                
+                DB_P[(Pegawai Storage)]
+                DB_A[(Approval Storage)]
+                
+                P4 <--> DB_P
+                P2 <-- Data Pegawai --> DB_P
+                P5 <--> DB_A
+                P3 <-- Cek Deadline --> DB_P
+        </div>
+    </div>
+
+    <!-- Flowchart -->
+    <div class="card">
+        <h2>3. Flowchart Alur Sistem</h2>
+        <div class="mermaid">
+            flowchart TD
+                Start([Mulai]) --> Login{Login}
+                Login -- Gagal --> Login
+                Login -- Berhasil --> RoleCheck{Cek Role}
+                
+                RoleCheck -- Admin --> AdminDash[Dashboard Admin]
+                RoleCheck -- Pegawai --> PegawaiDash[Dashboard Mandiri]
+                RoleCheck -- Pimpinan --> PimpinanDash[Dashboard Approval]
+                
+                subgraph "Proses Admin"
+                    AdminDash --> ManagePegawai[Input/Edit Data Pegawai]
+                    ManagePegawai --> CreateAccount[Buat Akun Pegawai]
+                    CreateAccount --> ViewReports[Cetak Laporan]
+                end
+                
+                subgraph "Proses Pegawai"
+                    PegawaiDash --> CheckStatus[Cek Progres Pangkat/KGB]
+                    CheckStatus --> UploadDoc[Upload Dokumen Pendukung]
+                end
+                
+                subgraph "Proses Pimpinan"
+                    PimpinanDash --> ReviewDoc[Review Pengajuan]
+                    ReviewDoc --> Decision{Setujui?}
+                    Decision -- Ya --> Approve[Update Status SK]
+                    Decision -- Tidak --> Reject[Berikan Catatan]
+                end
+                
+                Approve --> Finish([Selesai/Logout])
+                Reject --> Finish
+                ViewReports --> Finish
+                UploadDoc --> Finish
+        </div>
+    </div>
+
+    <!-- Sequence Diagram (Workflow) -->
+    <div class="card">
+        <h2>4. Sequence Diagram (Workflow Antar Role)</h2>
+        <div class="mermaid">
+            sequenceDiagram
+                participant P as Pegawai
+                participant A as Admin
+                participant S as Sistem
+                participant L as Pimpinan
+
+                A->>S: Input Data Pegawai Baru
+                S->>S: Hitung Estimasi Pangkat/KGB
+                A->>S: Aktivasi Akun Pegawai
+                S->>P: Kirim Notifikasi (H-30)
+                P->>S: Upload Dokumen Berkas
+                S->>A: Notifikasi "Perlu Verifikasi"
+                A->>L: Teruskan Berkas Tervalidasi
+                L->>S: Klik "Approve"
+                S->>P: Notifikasi "Pengajuan Disetujui"
+                S->>S: Reset Siklus (Pangkat +4Th, KGB +2Th)
+        </div>
+    </div>
+
+    <!-- Waterfall -->
+    <div class="card">
+        <h2>5. Metode Pengembangan Waterfall</h2>
+        <div class="mermaid">
+            graph TD
+                A[Requirements Analysis] --> B[System Design]
+                B --> C[Implementation]
+                C --> D[Integration & Testing]
+                D --> E[Deployment]
+                E --> F[Maintenance]
+                style A fill:#f9f,stroke:#333,stroke-width:2px
+                style B fill:#bbf,stroke:#333,stroke-width:2px
+                style C fill:#bfb,stroke:#333,stroke-width:2px
+                style D fill:#fbf,stroke:#333,stroke-width:2px
+                style E fill:#fbb,stroke:#333,stroke-width:2px
+                style F fill:#eee,stroke:#333,stroke-width:2px
+        </div>
+    </div>
+
+</body>
+</html>
