@@ -14,18 +14,18 @@ const Ctx = createContext<AuthCtx>({
 });
 
 export function AuthProvider({ children }: { children: ReactNode }) {
-  const [user, setUser] = useState<User | null>(null);
-
-  useEffect(() => {
+  const [user, setUser] = useState<User | null>(() => {
     const storedUser = localStorage.getItem("sikapas_user");
     if (storedUser) {
       try {
-        setUser(JSON.parse(storedUser));
+        return JSON.parse(storedUser);
       } catch (e) {
         localStorage.removeItem("sikapas_user");
+        return null;
       }
     }
-  }, []);
+    return null;
+  });
 
   const login = (userData: User, token: string) => {
     localStorage.setItem("sikapas_token", token);

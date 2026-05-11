@@ -1,5 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { AppShell } from "@/components/app-shell";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -11,7 +11,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { Plus, Edit2, Trash2, Search } from "lucide-react";
+import { Plus, Edit2, Trash2, Search, Loader2 } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import {
   Dialog,
@@ -30,6 +30,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { toast } from "sonner";
+import api from "@/services/api";
 
 export const Route = createFileRoute("/master/jabatan")({ component: MasterJabatan });
 
@@ -40,16 +41,9 @@ interface Jabatan {
   eselon: string;
 }
 
-const initialJabatan: Jabatan[] = [
-  { id: 1, nama: "Kepala Bagian Umum", tipe: "Struktural", eselon: "II.b" },
-  { id: 2, nama: "Analis Kepegawaian Ahli Muda", tipe: "Fungsional", eselon: "-" },
-  { id: 3, nama: "Pranata Komputer Ahli Pertama", tipe: "Fungsional", eselon: "-" },
-  { id: 4, nama: "Bendahara Pengeluaran", tipe: "Pelaksana", eselon: "-" },
-  { id: 5, nama: "Sekretaris Dinas", tipe: "Struktural", eselon: "II.a" },
-];
-
 function MasterJabatan() {
-  const [list, setList] = useState<Jabatan[]>(initialJabatan);
+  const [list, setList] = useState<Jabatan[]>([]);
+  const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingItem, setEditingItem] = useState<Jabatan | null>(null);
@@ -58,6 +52,25 @@ function MasterJabatan() {
     tipe: "Fungsional",
     eselon: "-",
   });
+
+  const fetchJabatan = async () => {
+    try {
+      setLoading(true);
+      const response = await api.get("/master/jabatan");
+      if (response.data.success) {
+        setList(response.data.data);
+      }
+    } catch (error) {
+      console.error("Error fetching jabatan:", error);
+      toast.error("Gagal mengambil data jabatan");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchJabatan();
+  }, []);
 
   const filtered = list.filter(
     (item) =>
@@ -77,24 +90,42 @@ function MasterJabatan() {
     setIsDialogOpen(true);
   };
 
-  const handleDelete = (id: number) => {
+  const handleDelete = async (id: number) => {
     if (confirm("Apakah Anda yakin ingin menghapus data ini?")) {
-      setList(list.filter((i) => i.id !== id));
-      toast.success("Data berhasil dihapus");
+      try {
+        const response = await api.delete(`/master/jabatan/${id}`);
+        if (response.data.success) {
+          setList(list.filter((i) => i.id !== id));
+          toast.success("Data berhasil dihapus");
+        }
+      } catch (error: any) {
+        console.error("Error deleting jabatan:", error);
+        toast.error(error.response?.data?.message || "Gagal menghapus data");
+      }
     }
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (editingItem) {
-      setList(list.map((i) => (i.id === editingItem.id ? { ...i, ...formData } : i)));
-      toast.success("Data berhasil diperbarui");
-    } else {
-      const newId = Math.max(...list.map((i) => i.id), 0) + 1;
-      setList([...list, { id: newId, ...formData }]);
-      toast.success("Data berhasil ditambah");
+    try {
+      if (editingItem) {
+        const response = await api.put(`/master/jabatan/${editingItem.id}`, formData);
+        if (response.data.success) {
+          setList(list.map((i) => (i.id === editingItem.id ? response.data.data : i)));
+          toast.success("Data berhasil diperbarui");
+        }
+      } else {
+        const response = await api.post("/master/jabatan", formData);
+        if (response.data.success) {
+          setList([...list, response.data.data]);
+          toast.success("Data berhasil ditambah");
+        }
+      }
+      setIsDialogOpen(false);
+    } catch (error: any) {
+      console.error("Error saving jabatan:", error);
+      toast.error(error.response?.data?.message || "Gagal menyimpan data");
     }
-    setIsDialogOpen(false);
   };
 
   return (
@@ -125,52 +156,59 @@ function MasterJabatan() {
             </div>
           </div>
           <CardContent className="p-0">
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Nama Jabatan</TableHead>
-                  <TableHead>Tipe</TableHead>
-                  <TableHead>Eselon</TableHead>
-                  <TableHead className="text-right">Aksi</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {filtered.map((j) => (
-                  <TableRow key={j.id}>
-                    <TableCell className="font-medium">{j.nama}</TableCell>
-                    <TableCell>{j.tipe}</TableCell>
-                    <TableCell>{j.eselon}</TableCell>
-                    <TableCell className="text-right">
-                      <div className="flex justify-end gap-2">
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          className="size-8 text-info hover:text-info hover:bg-info/10"
-                          onClick={() => handleOpenEdit(j)}
-                        >
-                          <Edit2 className="size-4" />
-                        </Button>
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          className="size-8 text-destructive hover:text-destructive hover:bg-destructive/10"
-                          onClick={() => handleDelete(j.id)}
-                        >
-                          <Trash2 className="size-4" />
-                        </Button>
-                      </div>
-                    </TableCell>
-                  </TableRow>
-                ))}
-                {filtered.length === 0 && (
+            {loading ? (
+              <div className="flex flex-col items-center justify-center p-12 space-y-4 text-muted-foreground">
+                <Loader2 className="size-8 animate-spin" />
+                <p>Memuat data...</p>
+              </div>
+            ) : (
+              <Table>
+                <TableHeader>
                   <TableRow>
-                    <TableCell colSpan={4} className="h-24 text-center text-muted-foreground">
-                      Tidak ada data ditemukan.
-                    </TableCell>
+                    <TableHead>Nama Jabatan</TableHead>
+                    <TableHead>Tipe</TableHead>
+                    <TableHead>Eselon</TableHead>
+                    <TableHead className="text-right">Aksi</TableHead>
                   </TableRow>
-                )}
-              </TableBody>
-            </Table>
+                </TableHeader>
+                <TableBody>
+                  {filtered.map((j) => (
+                    <TableRow key={j.id}>
+                      <TableCell className="font-medium">{j.nama}</TableCell>
+                      <TableCell>{j.tipe}</TableCell>
+                      <TableCell>{j.eselon}</TableCell>
+                      <TableCell className="text-right">
+                        <div className="flex justify-end gap-2">
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="size-8 text-info hover:text-info hover:bg-info/10"
+                            onClick={() => handleOpenEdit(j)}
+                          >
+                            <Edit2 className="size-4" />
+                          </Button>
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="size-8 text-destructive hover:text-destructive hover:bg-destructive/10"
+                            onClick={() => handleDelete(j.id)}
+                          >
+                            <Trash2 className="size-4" />
+                          </Button>
+                        </div>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                  {filtered.length === 0 && (
+                    <TableRow>
+                      <TableCell colSpan={4} className="h-24 text-center text-muted-foreground">
+                        Tidak ada data ditemukan.
+                      </TableCell>
+                    </TableRow>
+                  )}
+                </TableBody>
+              </Table>
+            )}
           </CardContent>
         </Card>
       </div>

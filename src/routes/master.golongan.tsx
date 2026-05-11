@@ -1,5 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { AppShell } from "@/components/app-shell";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -11,7 +11,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { Plus, Edit2, Trash2 } from "lucide-react";
+import { Plus, Edit2, Trash2, Loader2 } from "lucide-react";
 import {
   Dialog,
   DialogContent,
@@ -23,6 +23,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
+import api from "@/services/api";
 
 export const Route = createFileRoute("/master/golongan")({ component: MasterGolongan });
 
@@ -33,21 +34,31 @@ interface Golongan {
   ruang: string;
 }
 
-const initialGolongan: Golongan[] = [
-  { id: 1, kode: "IV/e", nama: "Pembina Utama", ruang: "e" },
-  { id: 2, kode: "IV/d", nama: "Pembina Utama Madya", ruang: "d" },
-  { id: 3, kode: "IV/c", nama: "Pembina Utama Muda", ruang: "c" },
-  { id: 4, kode: "IV/b", nama: "Pembina Tingkat I", ruang: "b" },
-  { id: 5, kode: "IV/a", nama: "Pembina", ruang: "a" },
-  { id: 6, kode: "III/d", nama: "Penata Tingkat I", ruang: "d" },
-  { id: 7, kode: "III/c", nama: "Penata", ruang: "c" },
-];
-
 function MasterGolongan() {
-  const [list, setList] = useState<Golongan[]>(initialGolongan);
+  const [list, setList] = useState<Golongan[]>([]);
+  const [loading, setLoading] = useState(true);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingItem, setEditingItem] = useState<Golongan | null>(null);
   const [formData, setFormData] = useState<Omit<Golongan, "id">>({ kode: "", nama: "", ruang: "" });
+
+  const fetchGolongan = async () => {
+    try {
+      setLoading(true);
+      const response = await api.get("/master/golongan");
+      if (response.data.success) {
+        setList(response.data.data);
+      }
+    } catch (error) {
+      console.error("Error fetching golongan:", error);
+      toast.error("Gagal mengambil data golongan");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchGolongan();
+  }, []);
 
   const handleOpenAdd = () => {
     setEditingItem(null);
@@ -61,24 +72,42 @@ function MasterGolongan() {
     setIsDialogOpen(true);
   };
 
-  const handleDelete = (id: number) => {
+  const handleDelete = async (id: number) => {
     if (confirm("Apakah Anda yakin ingin menghapus data ini?")) {
-      setList(list.filter((i) => i.id !== id));
-      toast.success("Data berhasil dihapus");
+      try {
+        const response = await api.delete(`/master/golongan/${id}`);
+        if (response.data.success) {
+          setList(list.filter((i) => i.id !== id));
+          toast.success("Data berhasil dihapus");
+        }
+      } catch (error: any) {
+        console.error("Error deleting golongan:", error);
+        toast.error(error.response?.data?.message || "Gagal menghapus data");
+      }
     }
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (editingItem) {
-      setList(list.map((i) => (i.id === editingItem.id ? { ...i, ...formData } : i)));
-      toast.success("Data berhasil diperbarui");
-    } else {
-      const newId = Math.max(...list.map((i) => i.id), 0) + 1;
-      setList([...list, { id: newId, ...formData }]);
-      toast.success("Data berhasil ditambah");
+    try {
+      if (editingItem) {
+        const response = await api.put(`/master/golongan/${editingItem.id}`, formData);
+        if (response.data.success) {
+          setList(list.map((i) => (i.id === editingItem.id ? response.data.data : i)));
+          toast.success("Data berhasil diperbarui");
+        }
+      } else {
+        const response = await api.post("/master/golongan", formData);
+        if (response.data.success) {
+          setList([...list, response.data.data]);
+          toast.success("Data berhasil ditambah");
+        }
+      }
+      setIsDialogOpen(false);
+    } catch (error: any) {
+      console.error("Error saving golongan:", error);
+      toast.error(error.response?.data?.message || "Gagal menyimpan data");
     }
-    setIsDialogOpen(false);
   };
 
   return (
@@ -96,45 +125,59 @@ function MasterGolongan() {
 
         <Card className="shadow-card">
           <CardContent className="p-0">
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead className="w-[100px]">Kode</TableHead>
-                  <TableHead>Nama Pangkat</TableHead>
-                  <TableHead>Ruang</TableHead>
-                  <TableHead className="text-right">Aksi</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {list.map((g) => (
-                  <TableRow key={g.id}>
-                    <TableCell className="font-bold">{g.kode}</TableCell>
-                    <TableCell>{g.nama}</TableCell>
-                    <TableCell className="uppercase">{g.ruang}</TableCell>
-                    <TableCell className="text-right">
-                      <div className="flex justify-end gap-2">
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          className="size-8 text-info hover:text-info hover:bg-info/10"
-                          onClick={() => handleOpenEdit(g)}
-                        >
-                          <Edit2 className="size-4" />
-                        </Button>
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          className="size-8 text-destructive hover:text-destructive hover:bg-destructive/10"
-                          onClick={() => handleDelete(g.id)}
-                        >
-                          <Trash2 className="size-4" />
-                        </Button>
-                      </div>
-                    </TableCell>
+            {loading ? (
+              <div className="flex flex-col items-center justify-center p-12 space-y-4 text-muted-foreground">
+                <Loader2 className="size-8 animate-spin" />
+                <p>Memuat data...</p>
+              </div>
+            ) : (
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead className="w-[100px]">Kode</TableHead>
+                    <TableHead>Nama Pangkat</TableHead>
+                    <TableHead>Ruang</TableHead>
+                    <TableHead className="text-right">Aksi</TableHead>
                   </TableRow>
-                ))}
-              </TableBody>
-            </Table>
+                </TableHeader>
+                <TableBody>
+                  {list.map((g) => (
+                    <TableRow key={g.id}>
+                      <TableCell className="font-bold">{g.kode}</TableCell>
+                      <TableCell>{g.nama}</TableCell>
+                      <TableCell className="uppercase">{g.ruang}</TableCell>
+                      <TableCell className="text-right">
+                        <div className="flex justify-end gap-2">
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="size-8 text-info hover:text-info hover:bg-info/10"
+                            onClick={() => handleOpenEdit(g)}
+                          >
+                            <Edit2 className="size-4" />
+                          </Button>
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="size-8 text-destructive hover:text-destructive hover:bg-destructive/10"
+                            onClick={() => handleDelete(g.id)}
+                          >
+                            <Trash2 className="size-4" />
+                          </Button>
+                        </div>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                  {list.length === 0 && (
+                    <TableRow>
+                      <TableCell colSpan={4} className="h-24 text-center text-muted-foreground">
+                        Tidak ada data ditemukan.
+                      </TableCell>
+                    </TableRow>
+                  )}
+                </TableBody>
+              </Table>
+            )}
           </CardContent>
         </Card>
       </div>
