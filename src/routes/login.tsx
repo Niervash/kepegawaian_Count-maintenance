@@ -14,6 +14,7 @@ import { useAuth } from "@/lib/auth-context";
 import { useState } from "react";
 import { toast } from "sonner";
 import { getStoredUsers, type Role } from "@/lib/simpeg-data";
+import api from "@/services/api";
 
 export const Route = createFileRoute("/login")({ component: Login });
 
@@ -29,38 +30,27 @@ function Login() {
 
   if (user) return <Navigate to="/dashboard" />;
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
 
-    // Mock authentication logic
-    setTimeout(() => {
-      const users = getStoredUsers();
-      // Match by ID/Key or NIP
-      const matchedUserId = Object.keys(users).find(
-        (id) =>
-          users[id].nip === formData.username || 
-          id === formData.username.toLowerCase() || 
-          users[id].email === formData.username
-      );
+    try {
+      const response = await api.post("/auth/login", {
+        nip: formData.username,
+        password: formData.password
+      });
 
-      const matchedUser = matchedUserId ? users[matchedUserId] : null;
-      const expectedPassword = matchedUser?.password || "password";
-
-      if (matchedUserId && formData.password === expectedPassword) {
-        const userToLogin = users[matchedUserId];
-        // Mock token for demo purposes
-        const mockToken = `demo_token_${matchedUserId}`;
-        login(userToLogin, mockToken);
-        toast.success(`Selamat datang, ${userToLogin.name}`);
+      if (response.data.success) {
+        const { token, ...userData } = response.data.data;
+        login(userData, token);
+        toast.success(`Selamat datang, ${userData.name}`);
         navigate({ to: "/dashboard" });
-      } else if (!matchedUserId) {
-        toast.error("User tidak ditemukan (Gunakan NIP atau username demo)");
-      } else {
-        toast.error("Password salah. Silakan coba lagi.");
       }
+    } catch (error: any) {
+      toast.error(error.response?.data?.message || "Login gagal. Periksa kembali NIP dan Password.");
+    } finally {
       setIsLoading(false);
-    }, 1000);
+    }
   };
 
   return (
