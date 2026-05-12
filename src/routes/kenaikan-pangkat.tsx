@@ -21,8 +21,8 @@ function Page() {
       try {
         const response = await api.get("/pegawai");
         if (response.data.success) {
-          const rawList = isPegawai 
-            ? response.data.data.filter((p: any) => p.nip === user?.nip) 
+          const rawList = isPegawai
+            ? response.data.data.filter((p: any) => p.nip === user?.nip)
             : response.data.data;
           setData(rawList);
         }
@@ -50,7 +50,12 @@ function Page() {
       year: "numeric",
     });
 
-  if (loading) return <AppShell title="Kenaikan Pangkat"><div className="p-8 text-center">Memuat data...</div></AppShell>;
+  if (loading)
+    return (
+      <AppShell title="Kenaikan Pangkat">
+        <div className="p-8 text-center">Memuat data...</div>
+      </AppShell>
+    );
 
   return (
     <AppShell title={isPegawai ? "Jadwal Pangkat Saya" : "Monitoring Kenaikan Pangkat"}>
@@ -154,7 +159,8 @@ function Page() {
           <div className="p-4 rounded-xl bg-primary/5 border border-primary/10 text-sm text-muted-foreground flex gap-3">
             <TrendingUp className="size-5 text-primary shrink-0" />
             <p>
-              <strong>Catatan:</strong> Jadwal di atas adalah estimasi sistem berdasarkan siklus 4 tahunan sejak tanggal masuk Anda. Pastikan Anda sudah mengunggah dokumen pendukung di
+              <strong>Catatan:</strong> Jadwal di atas adalah estimasi sistem berdasarkan siklus 4
+              tahunan sejak tanggal masuk Anda. Pastikan Anda sudah mengunggah dokumen pendukung di
               menu <strong>Layanan Mandiri</strong> sebelum tanggal tersebut.
             </p>
           </div>

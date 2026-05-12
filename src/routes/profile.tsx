@@ -27,14 +27,14 @@ function Page() {
       toast.error("Konfirmasi password baru tidak cocok");
       return;
     }
-    
+
     setLoading(true);
     try {
-      const response = await api.put('/auth/update-password', {
+      const response = await api.put("/auth/update-password", {
         oldPassword: passData.old,
-        newPassword: passData.new
+        newPassword: passData.new,
       });
-      
+
       if (response.data.success) {
         toast.success("Password berhasil diperbarui");
         setPassData({ old: "", new: "", confirm: "" });
@@ -59,12 +59,12 @@ function Page() {
             </Badge>
             <p className="text-sm text-muted-foreground mt-2">{user.jabatan}</p>
             <div className="mt-6 pt-6 border-t text-left space-y-3">
-               <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                  <UserIcon className="size-4" /> NIP: {user.nip}
-               </div>
-               <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                  <Mail className="size-4" /> {user.email}
-               </div>
+              <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                <UserIcon className="size-4" /> NIP: {user.nip}
+              </div>
+              <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                <Mail className="size-4" /> {user.email}
+              </div>
             </div>
           </CardContent>
         </Card>
@@ -90,7 +90,9 @@ function Page() {
               <Input defaultValue={user.jabatan} readOnly className="bg-muted/30" />
             </div>
             <div className="sm:col-span-2">
-              <p className="text-xs text-muted-foreground italic">* Untuk mengubah informasi profil, silakan hubungi Admin Kepegawaian.</p>
+              <p className="text-xs text-muted-foreground italic">
+                * Untuk mengubah informasi profil, silakan hubungi Admin Kepegawaian.
+              </p>
             </div>
           </CardContent>
         </Card>
@@ -162,7 +164,11 @@ function Page() {
                       onClick={() => setShowPass({ ...showPass, confirm: !showPass.confirm })}
                       className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
                     >
-                      {showPass.confirm ? <EyeOff className="size-4" /> : <Eye className="size-4" />}
+                      {showPass.confirm ? (
+                        <EyeOff className="size-4" />
+                      ) : (
+                        <Eye className="size-4" />
+                      )}
                     </button>
                   </div>
                 </div>

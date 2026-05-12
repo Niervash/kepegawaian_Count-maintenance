@@ -7,10 +7,10 @@ interface AuthCtx {
   logout: () => void;
 }
 
-const Ctx = createContext<AuthCtx>({ 
-  user: null, 
-  login: () => {}, 
-  logout: () => {} 
+const Ctx = createContext<AuthCtx>({
+  user: null,
+  login: () => {},
+  logout: () => {},
 });
 
 export function AuthProvider({ children }: { children: ReactNode }) {

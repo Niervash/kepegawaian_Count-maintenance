@@ -5,12 +5,19 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
+import { type Pegawai, nextPangkat, nextKgb } from "@/lib/simpeg-data";
 import {
-  type Pegawai,
-  nextPangkat,
-  nextKgb,
-} from "@/lib/simpeg-data";
-import { ArrowLeft, Mail, Phone, MapPin, Calendar, FileText, Award, Wallet, Briefcase, Clock } from "lucide-react";
+  ArrowLeft,
+  Mail,
+  Phone,
+  MapPin,
+  Calendar,
+  FileText,
+  Award,
+  Wallet,
+  Briefcase,
+  Clock,
+} from "lucide-react";
 import api from "@/services/api";
 
 export const Route = createFileRoute("/pegawai/$id")({ component: DetailPegawai });
@@ -36,14 +43,21 @@ function DetailPegawai() {
     fetchDetail();
   }, [id]);
 
-  if (loading) return <AppShell title="Detail Pegawai"><div className="p-8 text-center">Memuat data...</div></AppShell>;
-  
+  if (loading)
+    return (
+      <AppShell title="Detail Pegawai">
+        <div className="p-8 text-center">Memuat data...</div>
+      </AppShell>
+    );
+
   if (!p)
     return (
       <AppShell title="Tidak ditemukan">
         <div className="p-8 text-center">
           <p>Pegawai tidak ditemukan.</p>
-          <Link to="/pegawai" className="text-primary hover:underline mt-4 inline-block">Kembali ke Daftar Pegawai</Link>
+          <Link to="/pegawai" className="text-primary hover:underline mt-4 inline-block">
+            Kembali ke Daftar Pegawai
+          </Link>
         </div>
       </AppShell>
     );
@@ -110,11 +124,11 @@ function DetailPegawai() {
               <div className="text-xs text-muted-foreground">NIP</div>
               <div className="text-xs font-mono">{p.nip}</div>
               <div className="text-xs text-muted-foreground">TMT Pangkat</div>
-              <div className="text-xs">{p.tmtPangkat ? fmt(p.tmtPangkat) : '-'}</div>
+              <div className="text-xs">{p.tmtPangkat ? fmt(p.tmtPangkat) : "-"}</div>
               <div className="text-xs text-muted-foreground">TMT KGB</div>
-              <div className="text-xs">{p.tmtKgb ? fmt(p.tmtKgb) : '-'}</div>
+              <div className="text-xs">{p.tmtKgb ? fmt(p.tmtKgb) : "-"}</div>
               <div className="text-xs text-muted-foreground">Tanggal Masuk</div>
-              <div className="text-xs">{p.tanggalMasuk ? fmt(p.tanggalMasuk) : '-'}</div>
+              <div className="text-xs">{p.tanggalMasuk ? fmt(p.tanggalMasuk) : "-"}</div>
             </div>
           </CardContent>
         </Card>
@@ -178,7 +192,9 @@ function DetailPegawai() {
                   </TabsContent>
                   <TabsContent value="dokumen" className="mt-4">
                     <div className="grid sm:grid-cols-2 gap-3">
-                      <p className="text-sm text-muted-foreground italic col-span-2">Gunakan menu Approval untuk mengelola dokumen pengajuan.</p>
+                      <p className="text-sm text-muted-foreground italic col-span-2">
+                        Gunakan menu Approval untuk mengelola dokumen pengajuan.
+                      </p>
                     </div>
                   </TabsContent>
                 </Tabs>

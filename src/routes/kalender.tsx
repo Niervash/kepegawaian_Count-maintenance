@@ -5,7 +5,12 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { type Pegawai, nextPangkat, nextKgb } from "@/lib/simpeg-data";
-import { ChevronLeft, ChevronRight, Calendar as CalendarIcon, User as UserIcon } from "lucide-react";
+import {
+  ChevronLeft,
+  ChevronRight,
+  Calendar as CalendarIcon,
+  User as UserIcon,
+} from "lucide-react";
 import { cn } from "@/lib/utils";
 import api from "@/services/api";
 
@@ -32,7 +37,8 @@ function Page() {
     fetchData();
   }, []);
 
-  const daysInMonth = (date: Date) => new Date(date.getFullYear(), date.getMonth() + 1, 0).getDate();
+  const daysInMonth = (date: Date) =>
+    new Date(date.getFullYear(), date.getMonth() + 1, 0).getDate();
   const firstDayOfMonth = (date: Date) => new Date(date.getFullYear(), date.getMonth(), 1).getDay();
 
   const events = useMemo(() => {
@@ -47,12 +53,16 @@ function Page() {
   const monthEvents = useMemo(() => {
     return events.filter((e) => {
       const d = new Date(e.date);
-      return d.getMonth() === currentDate.getMonth() && d.getFullYear() === currentDate.getFullYear();
+      return (
+        d.getMonth() === currentDate.getMonth() && d.getFullYear() === currentDate.getFullYear()
+      );
     });
   }, [events, currentDate]);
 
-  const nextMonth = () => setCurrentDate(new Date(currentDate.getFullYear(), currentDate.getMonth() + 1));
-  const prevMonth = () => setCurrentDate(new Date(currentDate.getFullYear(), currentDate.getMonth() - 1));
+  const nextMonth = () =>
+    setCurrentDate(new Date(currentDate.getFullYear(), currentDate.getMonth() + 1));
+  const prevMonth = () =>
+    setCurrentDate(new Date(currentDate.getFullYear(), currentDate.getMonth() - 1));
 
   const calendarDays = useMemo(() => {
     const total = daysInMonth(currentDate);
@@ -63,7 +73,12 @@ function Page() {
     return days;
   }, [currentDate]);
 
-  if (loading) return <AppShell title="Kalender Monitoring"><div className="p-8 text-center">Memuat data...</div></AppShell>;
+  if (loading)
+    return (
+      <AppShell title="Kalender Monitoring">
+        <div className="p-8 text-center">Memuat data...</div>
+      </AppShell>
+    );
 
   return (
     <AppShell title="Kalender Monitoring">
@@ -74,17 +89,25 @@ function Page() {
               {currentDate.toLocaleDateString("id-ID", { month: "long", year: "numeric" })}
             </CardTitle>
             <div className="flex gap-2">
-              <Button size="sm" variant="outline" onClick={prevMonth}><ChevronLeft className="size-4" /></Button>
-              <Button size="sm" variant="outline" onClick={nextMonth}><ChevronRight className="size-4" /></Button>
+              <Button size="sm" variant="outline" onClick={prevMonth}>
+                <ChevronLeft className="size-4" />
+              </Button>
+              <Button size="sm" variant="outline" onClick={nextMonth}>
+                <ChevronRight className="size-4" />
+              </Button>
             </div>
           </CardHeader>
           <CardContent>
             <div className="grid grid-cols-7 border-b pb-2 text-center text-xs font-bold text-muted-foreground uppercase tracking-wider">
-              {["Min", "Sen", "Sel", "Rab", "Kam", "Jum", "Sab"].map((d) => <div key={d}>{d}</div>)}
+              {["Min", "Sen", "Sel", "Rab", "Kam", "Jum", "Sab"].map((d) => (
+                <div key={d}>{d}</div>
+              ))}
             </div>
             <div className="grid grid-cols-7 gap-px bg-border mt-2">
               {calendarDays.map((day, i) => {
-                const dayEvents = day ? monthEvents.filter(e => new Date(e.date).getDate() === day) : [];
+                const dayEvents = day
+                  ? monthEvents.filter((e) => new Date(e.date).getDate() === day)
+                  : [];
                 return (
                   <div key={i} className={cn("min-h-[100px] bg-card p-2", !day && "bg-muted/20")}>
                     {day && (
@@ -92,11 +115,16 @@ function Page() {
                         <div className="text-xs font-medium">{day}</div>
                         <div className="mt-1 space-y-1">
                           {dayEvents.map((e, ei) => (
-                            <div key={ei} className={cn(
-                              "text-[9px] p-1 rounded-sm border-l-2 truncate",
-                              e.type === 'pangkat' ? 'bg-primary/10 border-primary text-primary' : 'bg-success/10 border-success text-success'
-                            )}>
-                              {e.p.nama.split(' ')[0]} ({e.type === 'pangkat' ? 'P' : 'K'})
+                            <div
+                              key={ei}
+                              className={cn(
+                                "text-[9px] p-1 rounded-sm border-l-2 truncate",
+                                e.type === "pangkat"
+                                  ? "bg-primary/10 border-primary text-primary"
+                                  : "bg-success/10 border-success text-success",
+                              )}
+                            >
+                              {e.p.nama.split(" ")[0]} ({e.type === "pangkat" ? "P" : "K"})
                             </div>
                           ))}
                         </div>
@@ -110,22 +138,34 @@ function Page() {
         </Card>
 
         <Card className="shadow-card">
-          <CardHeader><CardTitle className="text-base">Agenda Bulan Ini</CardTitle></CardHeader>
+          <CardHeader>
+            <CardTitle className="text-base">Agenda Bulan Ini</CardTitle>
+          </CardHeader>
           <CardContent className="p-0">
             <div className="divide-y divide-border">
-              {monthEvents.length === 0 && <p className="p-5 text-sm text-muted-foreground text-center">Tidak ada agenda.</p>}
-              {monthEvents.sort((a,b) => new Date(a.date).getTime() - new Date(b.date).getTime()).map((e, i) => (
-                <div key={i} className="p-4 flex gap-3">
-                  <div className="flex flex-col items-center justify-center size-10 rounded-lg bg-muted text-foreground shrink-0">
-                    <span className="text-xs font-bold leading-none">{new Date(e.date).getDate()}</span>
-                    <span className="text-[9px] uppercase">{new Date(e.date).toLocaleDateString('id-ID', { month: 'short' })}</span>
+              {monthEvents.length === 0 && (
+                <p className="p-5 text-sm text-muted-foreground text-center">Tidak ada agenda.</p>
+              )}
+              {monthEvents
+                .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime())
+                .map((e, i) => (
+                  <div key={i} className="p-4 flex gap-3">
+                    <div className="flex flex-col items-center justify-center size-10 rounded-lg bg-muted text-foreground shrink-0">
+                      <span className="text-xs font-bold leading-none">
+                        {new Date(e.date).getDate()}
+                      </span>
+                      <span className="text-[9px] uppercase">
+                        {new Date(e.date).toLocaleDateString("id-ID", { month: "short" })}
+                      </span>
+                    </div>
+                    <div className="min-w-0">
+                      <div className="text-xs font-bold truncate">{e.p.nama}</div>
+                      <div className="text-[10px] text-muted-foreground capitalize">
+                        Naik {e.type}
+                      </div>
+                    </div>
                   </div>
-                  <div className="min-w-0">
-                    <div className="text-xs font-bold truncate">{e.p.nama}</div>
-                    <div className="text-[10px] text-muted-foreground capitalize">Naik {e.type}</div>
-                  </div>
-                </div>
-              ))}
+                ))}
             </div>
           </CardContent>
         </Card>

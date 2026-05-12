@@ -69,6 +69,106 @@ export const generateMonthlyPDF = (pegawai: Pegawai[]) => {
   doc.save(`Laporan_Bulanan_${monthName.replace(" ", "_")}.pdf`);
 };
 
+export const generatePangkatPDF = (pegawai: Pegawai[]) => {
+  const doc = new jsPDF();
+  const date = new Date();
+  const dateStr = format(date, "dd MMMM yyyy", { locale: id });
+
+  doc.setFontSize(16);
+  doc.text("Laporan Rekapitulasi Rencana Kenaikan Pangkat", 14, 22);
+  doc.setFontSize(10);
+  doc.setTextColor(100);
+  doc.text(`Dicetak pada: ${dateStr}`, 14, 28);
+
+  const pangkatData = pegawai
+    .filter((p) => p.status === "aktif")
+    .map((p) => ({
+      nama: p.nama,
+      nip: p.nip,
+      golongan: p.golongan,
+      tmtLalu: format(new Date(p.tmtPangkat), "dd/MM/yyyy"),
+      tmtNext: format(new Date(nextPangkat(p)), "dd/MM/yyyy"),
+    }));
+
+  autoTable(doc, {
+    startY: 35,
+    head: [["Nama", "NIP", "Golongan", "TMT Terakhir", "TMT Berikutnya"]],
+    body: pangkatData.map((p) => [p.nama, p.nip, p.golongan, p.tmtLalu, p.tmtNext]),
+    theme: "striped",
+    headStyles: { fillColor: [79, 70, 229] },
+  });
+
+  doc.save(`Laporan_Kenaikan_Pangkat_${format(date, "yyyyMMdd")}.pdf`);
+};
+
+export const generateKgbPDF = (pegawai: Pegawai[]) => {
+  const doc = new jsPDF();
+  const date = new Date();
+  const dateStr = format(date, "dd MMMM yyyy", { locale: id });
+
+  doc.setFontSize(16);
+  doc.text("Laporan Rekapitulasi Rencana KGB", 14, 22);
+  doc.setFontSize(10);
+  doc.setTextColor(100);
+  doc.text(`Dicetak pada: ${dateStr}`, 14, 28);
+
+  const kgbData = pegawai
+    .filter((p) => p.status === "aktif")
+    .map((p) => ({
+      nama: p.nama,
+      nip: p.nip,
+      unit: p.unitKerja,
+      tmtLalu: format(new Date(p.tmtKgb), "dd/MM/yyyy"),
+      tmtNext: format(new Date(nextKgb(p)), "dd/MM/yyyy"),
+    }));
+
+  autoTable(doc, {
+    startY: 35,
+    head: [["Nama", "NIP", "Unit Kerja", "TMT Terakhir", "TMT Berikutnya"]],
+    body: kgbData.map((p) => [p.nama, p.nip, p.unit, p.tmtLalu, p.tmtNext]),
+    theme: "striped",
+    headStyles: { fillColor: [16, 185, 129] },
+  });
+
+  doc.save(`Laporan_KGB_${format(date, "yyyyMMdd")}.pdf`);
+};
+
+export const generateStatistikPDF = (pegawai: Pegawai[]) => {
+  const doc = new jsPDF();
+  const date = new Date();
+
+  doc.setFontSize(18);
+  doc.text("Laporan Statistik Kepegawaian", 14, 22);
+
+  const total = pegawai.length;
+  const perGolongan = pegawai.reduce((acc: Record<string, number>, p) => {
+    acc[p.golongan] = (acc[p.golongan] || 0) + 1;
+    return acc;
+  }, {});
+
+  const perStatus = pegawai.reduce((acc: Record<string, number>, p) => {
+    acc[p.status] = (acc[p.status] || 0) + 1;
+    return acc;
+  }, {});
+
+  doc.setFontSize(12);
+  doc.text(`Total Pegawai: ${total}`, 14, 35);
+
+  autoTable(doc, {
+    startY: 45,
+    head: [["Kategori", "Detail", "Jumlah"]],
+    body: [
+      ["Status", "Aktif", perStatus["aktif"] || 0],
+      ["Status", "Cuti", perStatus["cuti"] || 0],
+      ["Status", "Pensiun", perStatus["pensiun"] || 0],
+      ...Object.entries(perGolongan).map(([gol, count]) => ["Golongan", gol, count]),
+    ],
+    theme: "grid",
+  });
+
+  doc.save(`Statistik_Pegawai_${format(date, "yyyyMMdd")}.pdf`);
+};
+
 export const exportToExcel = (pegawai: Pegawai[]) => {
   const data = pegawai.map((p) => ({
     "Nama Lengkap": p.nama,

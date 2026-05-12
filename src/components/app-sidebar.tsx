@@ -79,9 +79,9 @@ export function AppSidebar() {
           )}
         >
           <div className="size-12 shrink-0 transition-transform duration-300">
-            <img 
-              src="/kementrian_imigrasi_sikapas.png" 
-              alt="SIKAPAS Logo" 
+            <img
+              src="/kementrian_imigrasi_sikapas.png"
+              alt="SIKAPAS Logo"
               className="w-full h-full object-contain"
             />
           </div>

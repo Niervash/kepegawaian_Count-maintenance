@@ -76,10 +76,10 @@ function Dashboard() {
     const fetchDashboardData = async () => {
       try {
         const isPegawai = user?.role === "pegawai";
-        
+
         // Parallel requests
         const requests: Promise<any>[] = [api.get("/dokumen")];
-        
+
         if (!isPegawai) {
           requests.push(api.get("/dashboard/stats"));
           requests.push(api.get("/dashboard/distribution"));
@@ -92,7 +92,7 @@ function Dashboard() {
         }
 
         const responses = await Promise.all(requests);
-        
+
         setDocs(responses[0].data.data);
 
         if (!isPegawai) {
@@ -103,11 +103,13 @@ function Dashboard() {
           const pegawaiList = responses[1].data.data;
           const me = pegawaiList.find((p: any) => p.nip === user?.nip);
           setMyData(me || null);
-          
+
           // Filter my own approvals
-          const myApps = responses[2].data.data.filter((a: any) => a.pegawai_id === (user as any).id);
+          const myApps = responses[2].data.data.filter(
+            (a: any) => a.pegawai_id === (user as any).id,
+          );
           setStats({
-            myApprovalsCount: myApps.length
+            myApprovalsCount: myApps.length,
           });
         }
       } catch (error) {
@@ -135,7 +137,7 @@ function Dashboard() {
 
     try {
       const response = await api.post("/dokumen", formData, {
-        headers: { "Content-Type": "multipart/form-data" }
+        headers: { "Content-Type": "multipart/form-data" },
       });
 
       if (response.data.success) {
@@ -157,18 +159,18 @@ function Dashboard() {
     if (file.size > maxSize) {
       toast.error("File terlalu besar! Maksimal 2MB");
       e.target.value = "";
-      setNewDoc(prev => ({ ...prev, size: "" }));
+      setNewDoc((prev) => ({ ...prev, size: "" }));
       return;
     }
 
     const sizeStr = (file.size / (1024 * 1024)).toFixed(1) + " MB";
-    const extension = file.name.split('.').pop()?.toUpperCase() || "PDF";
-    
-    setNewDoc(prev => ({ 
-      ...prev, 
+    const extension = file.name.split(".").pop()?.toUpperCase() || "PDF";
+
+    setNewDoc((prev) => ({
+      ...prev,
       size: sizeStr,
       type: extension,
-      name: prev.name || file.name.split('.')[0]
+      name: prev.name || file.name.split(".")[0],
     }));
   };
 
@@ -177,7 +179,7 @@ function Dashboard() {
     try {
       const response = await api.delete(`/dokumen/${id}`);
       if (response.data.success) {
-        setDocs(docs.filter(d => d.id !== id));
+        setDocs(docs.filter((d) => d.id !== id));
         toast.success("Dokumen berhasil dihapus");
       }
     } catch (error: any) {
@@ -190,23 +192,32 @@ function Dashboard() {
 
   const isPegawai = user?.role === "pegawai";
 
-  const COLORS = ["oklch(0.65 0.14 200)", "oklch(0.55 0.16 260)", "oklch(0.7 0.15 155)", "oklch(0.78 0.16 75)"];
+  const COLORS = [
+    "oklch(0.65 0.14 200)",
+    "oklch(0.55 0.16 260)",
+    "oklch(0.7 0.15 155)",
+    "oklch(0.78 0.16 75)",
+  ];
 
   const chartTrendData = useMemo(() => {
     if (!trends) return [];
-    const months = Array.from(new Set([
-      ...trends.pangkat.map((i: any) => i.month),
-      ...trends.kgb.map((i: any) => i.month)
-    ])).sort();
-    
-    return months.map(m => ({
+    const months = Array.from(
+      new Set([...trends.pangkat.map((i: any) => i.month), ...trends.kgb.map((i: any) => i.month)]),
+    ).sort();
+
+    return months.map((m) => ({
       bulan: m,
       pangkat: trends.pangkat.find((i: any) => i.month === m)?.count || 0,
       kgb: trends.kgb.find((i: any) => i.month === m)?.count || 0,
     }));
   }, [trends]);
 
-  if (loading) return <AppShell title="Dashboard"><div className="p-8 text-center">Memuat data...</div></AppShell>;
+  if (loading)
+    return (
+      <AppShell title="Dashboard">
+        <div className="p-8 text-center">Memuat data...</div>
+      </AppShell>
+    );
 
   return (
     <AppShell title="Dashboard">
@@ -226,11 +237,14 @@ function Dashboard() {
                   user?.role === "pimpinan" &&
                   `${stats?.pendingApprovals || 0} pengajuan menunggu persetujuan Anda.`}
                 {isPegawai &&
-                  `Selamat datang di portal mandiri. Anda berada di Golongan ${myData?.golongan || '-'} sebagai ${myData?.jabatan || '-'}.`}
+                  `Selamat datang di portal mandiri. Anda berada di Golongan ${myData?.golongan || "-"} sebagai ${myData?.jabatan || "-"}.`}
               </p>
             </div>
             <div className="flex flex-col sm:flex-row sm:flex-wrap gap-3">
-              <Button asChild className="w-full sm:w-auto bg-white text-primary hover:bg-white/90 shadow-glow">
+              <Button
+                asChild
+                className="w-full sm:w-auto bg-white text-primary hover:bg-white/90 shadow-glow"
+              >
                 <Link to={isPegawai ? "/kenaikan-pangkat" : "/reminder"}>
                   {isPegawai ? "Ajukan Dokumen" : "Lihat Reminder"}
                 </Link>
@@ -265,17 +279,24 @@ function Dashboard() {
                                 <FileText className="size-5" />
                               </div>
                               <div>
-                                <div className="text-sm font-semibold truncate max-w-[200px] sm:max-w-xs">{doc.name}</div>
+                                <div className="text-sm font-semibold truncate max-w-[200px] sm:max-w-xs">
+                                  {doc.name}
+                                </div>
                                 <div className="text-[10px] text-muted-foreground uppercase tracking-wider">
                                   {doc.type} • {doc.size}
                                 </div>
                               </div>
                             </div>
                             <div className="flex gap-2">
-                              <Button size="sm" variant="ghost" className="h-8 px-2 w-full sm:w-auto justify-center" asChild>
-                                <a 
-                                  href={`http://localhost:5000${doc.file_url}`} 
-                                  target="_blank" 
+                              <Button
+                                size="sm"
+                                variant="ghost"
+                                className="h-8 px-2 w-full sm:w-auto justify-center"
+                                asChild
+                              >
+                                <a
+                                  href={`http://localhost:5000${doc.file_url}`}
+                                  target="_blank"
                                   rel="noreferrer"
                                   download
                                 >
@@ -307,38 +328,55 @@ function Dashboard() {
                           <DialogTitle>Manajemen Format Surat</DialogTitle>
                           <DialogDescription>Tambahkan atau hapus format surat.</DialogDescription>
                         </DialogHeader>
-                        
-                        <form onSubmit={handleAddDoc} className="space-y-4 mt-4 p-4 border rounded-xl bg-muted/20">
-                           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                              <div className="space-y-2">
-                                <Label>Nama Dokumen</Label>
-                                <Input 
-                                  placeholder="Contoh: Template SKP..."
-                                  value={newDoc.name}
-                                  onChange={e => setNewDoc({...newDoc, name: e.target.value})}
-                                />
-                              </div>
-                              <div className="space-y-2">
-                                <Label>Pilih File (Max 2MB)</Label>
-                                <Input 
-                                  type="file"
-                                  className="cursor-pointer"
-                                  onChange={handleFileChange}
-                                  accept=".pdf,.docx,.doc,.xlsx,.xls"
-                                />
-                                {newDoc.size && (
-                                  <p className="text-[10px] text-primary font-medium">Ukuran: {newDoc.size}</p>
-                                )}
-                              </div>
-                           </div>
-                           <Button type="submit" className="w-full">Tambahkan Dokumen</Button>
+
+                        <form
+                          onSubmit={handleAddDoc}
+                          className="space-y-4 mt-4 p-4 border rounded-xl bg-muted/20"
+                        >
+                          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div className="space-y-2">
+                              <Label>Nama Dokumen</Label>
+                              <Input
+                                placeholder="Contoh: Template SKP..."
+                                value={newDoc.name}
+                                onChange={(e) => setNewDoc({ ...newDoc, name: e.target.value })}
+                              />
+                            </div>
+                            <div className="space-y-2">
+                              <Label>Pilih File (Max 2MB)</Label>
+                              <Input
+                                type="file"
+                                className="cursor-pointer"
+                                onChange={handleFileChange}
+                                accept=".pdf,.docx,.doc,.xlsx,.xls"
+                              />
+                              {newDoc.size && (
+                                <p className="text-[10px] text-primary font-medium">
+                                  Ukuran: {newDoc.size}
+                                </p>
+                              )}
+                            </div>
+                          </div>
+                          <Button type="submit" className="w-full">
+                            Tambahkan Dokumen
+                          </Button>
                         </form>
 
                         <div className="mt-6 space-y-3 max-h-[300px] overflow-y-auto pr-2">
-                          {docs.map(doc => (
-                            <div key={doc.id} className="flex items-center justify-between p-3 border rounded-lg">
-                              <span className="text-sm font-medium truncate pr-2">{doc.name} ({doc.size})</span>
-                              <Button variant="ghost" size="sm" onClick={() => handleDeleteDoc(doc.id)} className="shrink-0">
+                          {docs.map((doc) => (
+                            <div
+                              key={doc.id}
+                              className="flex items-center justify-between p-3 border rounded-lg"
+                            >
+                              <span className="text-sm font-medium truncate pr-2">
+                                {doc.name} ({doc.size})
+                              </span>
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                onClick={() => handleDeleteDoc(doc.id)}
+                                className="shrink-0"
+                              >
                                 <Trash2 className="size-4 text-destructive" />
                               </Button>
                             </div>
@@ -347,7 +385,11 @@ function Dashboard() {
                       </DialogContent>
                     </Dialog>
                   )}
-                  <Button asChild variant="outline" className="w-full sm:w-auto bg-white/10 border-white/30 text-white hover:bg-white/20 hover:text-white">
+                  <Button
+                    asChild
+                    variant="outline"
+                    className="w-full sm:w-auto bg-white/10 border-white/30 text-white hover:bg-white/20 hover:text-white"
+                  >
                     <Link to="/laporan">Generate Laporan</Link>
                   </Button>
                 </div>
@@ -360,16 +402,56 @@ function Dashboard() {
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
           {(isPegawai
             ? [
-                { label: "Golongan Saat Ini", value: myData?.golongan || "-", icon: UserIcon, accent: "bg-primary/10 text-primary" },
-                { label: "Hari Menuju Pangkat", value: Math.max(0, daysToPangkat).toString(), icon: TrendingUp, accent: "bg-info/10 text-info" },
-                { label: "Hari Menuju KGB", value: Math.max(0, daysToKgb).toString(), icon: Wallet, accent: "bg-success/10 text-success" },
-                { label: "Status Pengajuan", value: stats?.myApprovalsCount?.toString() || "0", icon: FileCheck, accent: "bg-warning/10 text-warning" },
+                {
+                  label: "Golongan Saat Ini",
+                  value: myData?.golongan || "-",
+                  icon: UserIcon,
+                  accent: "bg-primary/10 text-primary",
+                },
+                {
+                  label: "Hari Menuju Pangkat",
+                  value: Math.max(0, daysToPangkat).toString(),
+                  icon: TrendingUp,
+                  accent: "bg-info/10 text-info",
+                },
+                {
+                  label: "Hari Menuju KGB",
+                  value: Math.max(0, daysToKgb).toString(),
+                  icon: Wallet,
+                  accent: "bg-success/10 text-success",
+                },
+                {
+                  label: "Status Pengajuan",
+                  value: stats?.myApprovalsCount?.toString() || "0",
+                  icon: FileCheck,
+                  accent: "bg-warning/10 text-warning",
+                },
               ]
             : [
-                { label: "Total Pegawai", value: stats?.totalPegawai?.toString() || "0", icon: Users, accent: "bg-info/10 text-info" },
-                { label: "Akan Naik Pangkat", value: stats?.upcomingPangkat?.toString() || "0", icon: TrendingUp, accent: "bg-primary/10 text-primary" },
-                { label: "Akan KGB", value: stats?.upcomingKGB?.toString() || "0", icon: Wallet, accent: "bg-success/10 text-success" },
-                { label: "Pending Approval", value: stats?.pendingApprovals?.toString() || "0", icon: FileCheck, accent: "bg-warning/10 text-warning" },
+                {
+                  label: "Total Pegawai",
+                  value: stats?.totalPegawai?.toString() || "0",
+                  icon: Users,
+                  accent: "bg-info/10 text-info",
+                },
+                {
+                  label: "Akan Naik Pangkat",
+                  value: stats?.upcomingPangkat?.toString() || "0",
+                  icon: TrendingUp,
+                  accent: "bg-primary/10 text-primary",
+                },
+                {
+                  label: "Akan KGB",
+                  value: stats?.upcomingKGB?.toString() || "0",
+                  icon: Wallet,
+                  accent: "bg-success/10 text-success",
+                },
+                {
+                  label: "Pending Approval",
+                  value: stats?.pendingApprovals?.toString() || "0",
+                  icon: FileCheck,
+                  accent: "bg-warning/10 text-warning",
+                },
               ]
           ).map((s) => (
             <Card key={s.label} className="shadow-card">
@@ -388,43 +470,63 @@ function Dashboard() {
 
         {/* Charts */}
         {!isPegawai && (
-           <div className="grid lg:grid-cols-3 gap-4">
-              <Card className="lg:col-span-2 shadow-card">
-                <CardHeader><CardTitle className="text-base">Trend Kenaikan Pangkat & KGB</CardTitle></CardHeader>
-                <CardContent>
-                  <ResponsiveContainer width="100%" height={260}>
-                    <AreaChart data={chartTrendData}>
-                      <CartesianGrid strokeDasharray="3 3" vertical={false} />
-                      <XAxis dataKey="bulan" fontSize={11} />
-                      <YAxis fontSize={11} />
-                      <Tooltip />
-                      <Area name="Pangkat" type="monotone" dataKey="pangkat" stroke="oklch(0.55 0.16 260)" fill="oklch(0.55 0.16 260)" fillOpacity={0.1} />
-                      <Area name="KGB" type="monotone" dataKey="kgb" stroke="oklch(0.7 0.15 155)" fill="oklch(0.7 0.15 155)" fillOpacity={0.1} />
-                    </AreaChart>
-                  </ResponsiveContainer>
-                </CardContent>
-              </Card>
-              <Card className="shadow-card">
-                <CardHeader><CardTitle className="text-base">Distribusi Golongan</CardTitle></CardHeader>
-                <CardContent>
-                  <ResponsiveContainer width="100%" height={260}>
-                    <PieChart>
-                      <Pie 
-                        data={distribution} 
-                        dataKey="count" 
-                        nameKey="golongan_kode" 
-                        innerRadius={60} 
-                        outerRadius={80}
-                      >
-                        {distribution.map((d, i) => <Cell key={i} fill={COLORS[i % COLORS.length]} />)}
-                      </Pie>
-                      <Tooltip />
-                      <Legend />
-                    </PieChart>
-                  </ResponsiveContainer>
-                </CardContent>
-              </Card>
-           </div>
+          <div className="grid lg:grid-cols-3 gap-4">
+            <Card className="lg:col-span-2 shadow-card">
+              <CardHeader>
+                <CardTitle className="text-base">Trend Kenaikan Pangkat & KGB</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <ResponsiveContainer width="100%" height={260}>
+                  <AreaChart data={chartTrendData}>
+                    <CartesianGrid strokeDasharray="3 3" vertical={false} />
+                    <XAxis dataKey="bulan" fontSize={11} />
+                    <YAxis fontSize={11} />
+                    <Tooltip />
+                    <Area
+                      name="Pangkat"
+                      type="monotone"
+                      dataKey="pangkat"
+                      stroke="oklch(0.55 0.16 260)"
+                      fill="oklch(0.55 0.16 260)"
+                      fillOpacity={0.1}
+                    />
+                    <Area
+                      name="KGB"
+                      type="monotone"
+                      dataKey="kgb"
+                      stroke="oklch(0.7 0.15 155)"
+                      fill="oklch(0.7 0.15 155)"
+                      fillOpacity={0.1}
+                    />
+                  </AreaChart>
+                </ResponsiveContainer>
+              </CardContent>
+            </Card>
+            <Card className="shadow-card">
+              <CardHeader>
+                <CardTitle className="text-base">Distribusi Golongan</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <ResponsiveContainer width="100%" height={260}>
+                  <PieChart>
+                    <Pie
+                      data={distribution}
+                      dataKey="count"
+                      nameKey="golongan_kode"
+                      innerRadius={60}
+                      outerRadius={80}
+                    >
+                      {distribution.map((d, i) => (
+                        <Cell key={i} fill={COLORS[i % COLORS.length]} />
+                      ))}
+                    </Pie>
+                    <Tooltip />
+                    <Legend />
+                  </PieChart>
+                </ResponsiveContainer>
+              </CardContent>
+            </Card>
+          </div>
         )}
       </div>
     </AppShell>

@@ -21,8 +21,8 @@ function Page() {
       try {
         const response = await api.get("/pegawai");
         if (response.data.success) {
-          const rawList = isPegawai 
-            ? response.data.data.filter((p: any) => p.nip === user?.nip) 
+          const rawList = isPegawai
+            ? response.data.data.filter((p: any) => p.nip === user?.nip)
             : response.data.data;
           setData(rawList);
         }
@@ -50,7 +50,12 @@ function Page() {
       year: "numeric",
     });
 
-  if (loading) return <AppShell title="KGB"><div className="p-8 text-center">Memuat data...</div></AppShell>;
+  if (loading)
+    return (
+      <AppShell title="KGB">
+        <div className="p-8 text-center">Memuat data...</div>
+      </AppShell>
+    );
 
   return (
     <AppShell title={isPegawai ? "Jadwal KGB Saya" : "Monitoring Kenaikan Gaji Berkala"}>
@@ -93,7 +98,9 @@ function Page() {
           <CardHeader className="bg-muted/30">
             <CardTitle className="text-base flex items-center gap-2">
               <Clock className="size-4 text-success" />
-              {isPegawai ? "Estimasi KGB Berikutnya" : "Jadwal Monitoring (Siklus 2 Tahunan Sejak Masuk)"}
+              {isPegawai
+                ? "Estimasi KGB Berikutnya"
+                : "Jadwal Monitoring (Siklus 2 Tahunan Sejak Masuk)"}
             </CardTitle>
           </CardHeader>
           <CardContent className="p-0">
@@ -153,8 +160,8 @@ function Page() {
             <Wallet className="size-5 text-success shrink-0" />
             <p>
               <strong>Informasi:</strong> Kenaikan Gaji Berkala (KGB) diberikan setiap 2 tahun
-              sekali sejak tanggal masuk Anda. Sistem akan memberikan notifikasi otomatis ke Admin untuk memproses SK KGB
-              Anda sebelum tanggal jatuh tempo.
+              sekali sejak tanggal masuk Anda. Sistem akan memberikan notifikasi otomatis ke Admin
+              untuk memproses SK KGB Anda sebelum tanggal jatuh tempo.
             </p>
           </div>
         )}

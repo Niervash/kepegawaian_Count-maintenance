@@ -14,11 +14,7 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/lib/auth-context";
-import { 
-  nextPangkat, 
-  daysUntil,
-  type Pegawai
-} from "@/lib/simpeg-data";
+import { nextPangkat, daysUntil, type Pegawai } from "@/lib/simpeg-data";
 import { useMemo, useState, useEffect } from "react";
 import {
   Carousel,
@@ -46,7 +42,7 @@ export const Route = createFileRoute("/")({
 function Landing() {
   const { user } = useAuth();
   const [allPegawai, setAllPegawai] = useState<Pegawai[]>([]);
-  
+
   useEffect(() => {
     const fetchData = async () => {
       if (!user) return;
@@ -59,19 +55,19 @@ function Landing() {
     };
     fetchData();
   }, [user]);
-  
+
   const upcomingPangkat = useMemo(() => {
     if (!user) return [];
-    
+
     return allPegawai
-      .map(p => ({
+      .map((p) => ({
         id: p.id,
         nama: p.nama,
         nip: p.nip,
         tglNext: nextPangkat(p),
-        sisaHari: daysUntil(nextPangkat(p))
+        sisaHari: daysUntil(nextPangkat(p)),
       }))
-      .filter(p => p.sisaHari > 0)
+      .filter((p) => p.sisaHari > 0)
       .sort((a, b) => a.sisaHari - b.sisaHari)
       .slice(0, 5);
   }, [allPegawai, user]);
@@ -87,12 +83,36 @@ function Landing() {
   }, [carouselApi]);
 
   const features = [
-    { icon: TrendingUp, title: "Kenaikan Pangkat Otomatis", desc: "Sistem menghitung jadwal naik pangkat setiap 4 tahun secara otomatis." },
-    { icon: Wallet, title: "KGB Otomatis", desc: "Kenaikan Gaji Berkala dijadwalkan otomatis tiap 2 tahun, lengkap dengan pengingat." },
-    { icon: Bell, title: "Reminder H-30/14/7", desc: "Notifikasi dashboard, email, dan WhatsApp sebelum deadline administrasi." },
-    { icon: FileCheck, title: "Approval Workflow", desc: "Alur approval dokumen yang transparan dari pegawai → admin → pimpinan." },
-    { icon: Calendar, title: "Kalender Monitoring", desc: "Visualisasi jadwal pangkat, KGB, dan deadline dokumen dalam satu kalender." },
-    { icon: ShieldCheck, title: "Riwayat & Audit", desc: "Tracking lengkap riwayat pangkat, KGB, dan dokumen tiap pegawai." },
+    {
+      icon: TrendingUp,
+      title: "Kenaikan Pangkat Otomatis",
+      desc: "Sistem menghitung jadwal naik pangkat setiap 4 tahun secara otomatis.",
+    },
+    {
+      icon: Wallet,
+      title: "KGB Otomatis",
+      desc: "Kenaikan Gaji Berkala dijadwalkan otomatis tiap 2 tahun, lengkap dengan pengingat.",
+    },
+    {
+      icon: Bell,
+      title: "Reminder H-30/14/7",
+      desc: "Notifikasi dashboard, email, dan WhatsApp sebelum deadline administrasi.",
+    },
+    {
+      icon: FileCheck,
+      title: "Approval Workflow",
+      desc: "Alur approval dokumen yang transparan dari pegawai → admin → pimpinan.",
+    },
+    {
+      icon: Calendar,
+      title: "Kalender Monitoring",
+      desc: "Visualisasi jadwal pangkat, KGB, dan deadline dokumen dalam satu kalender.",
+    },
+    {
+      icon: ShieldCheck,
+      title: "Riwayat & Audit",
+      desc: "Tracking lengkap riwayat pangkat, KGB, dan dokumen tiap pegawai.",
+    },
   ];
 
   return (
@@ -101,22 +121,40 @@ function Landing() {
         <div className="container max-w-7xl mx-auto h-16 flex items-center justify-between px-4">
           <Link to="/" className="flex items-center gap-2.5 hover:opacity-90 transition-opacity">
             <div className="size-10 shrink-0">
-              <img src="/kementrian_imigrasi_sikapas.png" alt="SIKAPAS Logo" className="w-full h-full object-contain" />
+              <img
+                src="/kementrian_imigrasi_sikapas.png"
+                alt="SIKAPAS Logo"
+                className="w-full h-full object-contain"
+              />
             </div>
             <div>
               <div className="font-bold leading-tight">SIKAPAS</div>
-              <div className="text-[10px] uppercase tracking-wider text-muted-foreground">Sistem Kepegawaian</div>
+              <div className="text-[10px] uppercase tracking-wider text-muted-foreground">
+                Sistem Kepegawaian
+              </div>
             </div>
           </Link>
           <nav className="hidden md:flex items-center gap-7 text-sm font-medium text-muted-foreground">
-            <a href="#fitur" className="hover:text-foreground">Fitur</a>
-            <a href="#workflow" className="hover:text-foreground">Workflow</a>
-            <a href="#role" className="hover:text-foreground">Role</a>
+            <a href="#fitur" className="hover:text-foreground">
+              Fitur
+            </a>
+            <a href="#workflow" className="hover:text-foreground">
+              Workflow
+            </a>
+            <a href="#role" className="hover:text-foreground">
+              Role
+            </a>
           </nav>
           {user ? (
-            <Link to="/dashboard"><Button>Dashboard</Button></Link>
+            <Link to="/dashboard">
+              <Button>Dashboard</Button>
+            </Link>
           ) : (
-            <Link to="/login"><Button>Masuk Sistem <ArrowRight className="size-4" /></Button></Link>
+            <Link to="/login">
+              <Button>
+                Masuk Sistem <ArrowRight className="size-4" />
+              </Button>
+            </Link>
           )}
         </div>
       </header>
@@ -127,17 +165,23 @@ function Landing() {
           <div className="flex flex-col lg:flex-row items-center gap-16 lg:gap-10">
             <div className="max-w-2xl text-white">
               <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/10 backdrop-blur-md border border-white/20 text-xs font-medium mb-8">
-                <Sparkles className="size-3.5 text-yellow-400" /> Modern HRIS untuk Instansi Pemerintah
+                <Sparkles className="size-3.5 text-yellow-400" /> Modern HRIS untuk Instansi
+                Pemerintah
               </div>
               <h1 className="text-5xl lg:text-7xl font-bold tracking-tight leading-[1.05]">
-                Otomatisasi Kepegawaian <br /> <span className="opacity-60">tanpa terlewat sehari pun.</span>
+                Otomatisasi Kepegawaian <br />{" "}
+                <span className="opacity-60">tanpa terlewat sehari pun.</span>
               </h1>
               <p className="mt-8 text-xl text-white/80 leading-relaxed max-w-2xl">
-                SIKAPAS memantau jadwal kenaikan pangkat tiap 4 tahun, KGB tiap 2 tahun, dan mengingatkan sebelum deadline.
+                SIKAPAS memantau jadwal kenaikan pangkat tiap 4 tahun, KGB tiap 2 tahun, dan
+                mengingatkan sebelum deadline.
               </p>
               <div className="mt-10 flex flex-wrap gap-4">
                 <Link to={user ? "/dashboard" : "/login"}>
-                  <Button size="lg" className="bg-white text-primary hover:bg-white/90 h-14 px-8 text-base shadow-elevated">
+                  <Button
+                    size="lg"
+                    className="bg-white text-primary hover:bg-white/90 h-14 px-8 text-base shadow-elevated"
+                  >
                     {user ? "Masuk Dashboard" : "Mulai Sekarang"} <ArrowRight className="size-5" />
                   </Button>
                 </Link>
@@ -151,7 +195,11 @@ function Landing() {
                     {carouselImages.map((src, index) => (
                       <CarouselItem key={index}>
                         <div className="relative aspect-[16/10] rounded-2xl overflow-hidden bg-background/95 p-4 flex items-center justify-center">
-                          <img src={src} alt={`Preview ${index + 1}`} className="w-full h-full object-contain" />
+                          <img
+                            src={src}
+                            alt={`Preview ${index + 1}`}
+                            className="w-full h-full object-contain"
+                          />
                         </div>
                       </CarouselItem>
                     ))}
@@ -171,13 +219,19 @@ function Landing() {
               {upcomingPangkat.map((p) => (
                 <div key={p.id} className="p-5 rounded-2xl bg-card border border-border shadow-sm">
                   <div className="flex items-center gap-3 mb-4">
-                    <div className="size-10 rounded-full bg-gradient-primary flex items-center justify-center text-white text-xs font-bold">{p.nama.charAt(0)}</div>
+                    <div className="size-10 rounded-full bg-gradient-primary flex items-center justify-center text-white text-xs font-bold">
+                      {p.nama.charAt(0)}
+                    </div>
                     <div className="min-w-0">
                       <div className="text-sm font-bold truncate">{p.nama}</div>
                       <div className="text-[10px] text-muted-foreground">{p.nip}</div>
                     </div>
                   </div>
-                  <div className={`text-sm font-bold ${p.sisaHari <= 30 ? 'text-destructive' : 'text-primary'}`}>{p.sisaHari} Hari</div>
+                  <div
+                    className={`text-sm font-bold ${p.sisaHari <= 30 ? "text-destructive" : "text-primary"}`}
+                  >
+                    {p.sisaHari} Hari
+                  </div>
                 </div>
               ))}
             </div>
@@ -189,8 +243,13 @@ function Landing() {
         <div className="container max-w-7xl mx-auto px-4">
           <div className="grid md:grid-cols-3 gap-8">
             {features.map((f) => (
-              <div key={f.title} className="p-8 rounded-3xl bg-card border border-border shadow-card">
-                <div className="size-14 rounded-2xl bg-gradient-primary flex items-center justify-center mb-6 shadow-glow"><f.icon className="size-7 text-white" /></div>
+              <div
+                key={f.title}
+                className="p-8 rounded-3xl bg-card border border-border shadow-card"
+              >
+                <div className="size-14 rounded-2xl bg-gradient-primary flex items-center justify-center mb-6 shadow-glow">
+                  <f.icon className="size-7 text-white" />
+                </div>
                 <h3 className="font-bold text-xl mb-3">{f.title}</h3>
                 <p className="text-muted-foreground leading-relaxed text-sm">{f.desc}</p>
               </div>

@@ -37,7 +37,7 @@ function Login() {
     try {
       const response = await api.post("/auth/login", {
         nip: formData.username,
-        password: formData.password
+        password: formData.password,
       });
 
       if (response.data.success) {
@@ -47,7 +47,9 @@ function Login() {
         navigate({ to: "/dashboard" });
       }
     } catch (error: any) {
-      toast.error(error.response?.data?.message || "Login gagal. Periksa kembali NIP dan Password.");
+      toast.error(
+        error.response?.data?.message || "Login gagal. Periksa kembali NIP dan Password.",
+      );
     } finally {
       setIsLoading(false);
     }
@@ -63,9 +65,9 @@ function Login() {
           className="relative flex items-center gap-2.5 hover:opacity-90 transition-opacity w-fit"
         >
           <div className="size-10 shrink-0">
-            <img 
-              src="/kementrian_imigrasi_sikapas.png" 
-              alt="SIKAPAS Logo" 
+            <img
+              src="/kementrian_imigrasi_sikapas.png"
+              alt="SIKAPAS Logo"
               className="w-full h-full object-contain"
             />
           </div>
@@ -120,9 +122,9 @@ function Login() {
             className="lg:hidden flex items-center gap-2.5 mb-10 hover:opacity-90 transition-opacity w-fit"
           >
             <div className="size-11 shrink-0">
-              <img 
-                src="/kementrian_imigrasi_sikapas.png" 
-                alt="SIKAPAS Logo" 
+              <img
+                src="/kementrian_imigrasi_sikapas.png"
+                alt="SIKAPAS Logo"
                 className="w-full h-full object-contain"
               />
             </div>

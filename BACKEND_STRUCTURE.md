@@ -32,42 +32,45 @@ simpeg-backend/
 Berikut adalah desain tabel yang dibutuhkan agar sesuai dengan data di Frontend:
 
 ### Tabel `users` (Autentikasi)
-| Field | Type | Constraint | Keterangan |
-| :--- | :--- | :--- | :--- |
-| id | INT | PK, Auto Increment | |
-| name | VARCHAR(100) | NOT NULL | |
-| nip | VARCHAR(20) | UNIQUE, NOT NULL | Digunakan sebagai Username |
-| email | VARCHAR(100) | UNIQUE, NOT NULL | |
-| password | VARCHAR(255) | NOT NULL | Hashed (Bcrypt) |
-| role | ENUM | 'admin', 'pegawai', 'pimpinan' | |
-| jabatan | VARCHAR(100) | | |
-| created_at | TIMESTAMP | DEFAULT CURRENT_TIMESTAMP | |
+
+| Field      | Type         | Constraint                     | Keterangan                 |
+| :--------- | :----------- | :----------------------------- | :------------------------- |
+| id         | INT          | PK, Auto Increment             |                            |
+| name       | VARCHAR(100) | NOT NULL                       |                            |
+| nip        | VARCHAR(20)  | UNIQUE, NOT NULL               | Digunakan sebagai Username |
+| email      | VARCHAR(100) | UNIQUE, NOT NULL               |                            |
+| password   | VARCHAR(255) | NOT NULL                       | Hashed (Bcrypt)            |
+| role       | ENUM         | 'admin', 'pegawai', 'pimpinan' |                            |
+| jabatan    | VARCHAR(100) |                                |                            |
+| created_at | TIMESTAMP    | DEFAULT CURRENT_TIMESTAMP      |                            |
 
 ### Tabel `pegawai` (Data Master)
-| Field | Type | Constraint | Keterangan |
-| :--- | :--- | :--- | :--- |
-| id | INT | PK, Auto Increment | |
-| nip | VARCHAR(20) | UNIQUE, NOT NULL | |
-| nama | VARCHAR(100) | NOT NULL | |
-| jabatan | VARCHAR(100) | | |
-| golongan | VARCHAR(10) | | |
-| unit_kerja | VARCHAR(100) | | |
-| email | VARCHAR(100) | | |
-| phone | VARCHAR(20) | | |
-| tmt_pangkat | DATE | | Tanggal terakhir naik pangkat |
-| tmt_kgb | DATE | | Tanggal terakhir KGB |
-| status | ENUM | 'aktif', 'cuti', 'pensiun' | |
+
+| Field       | Type         | Constraint                 | Keterangan                    |
+| :---------- | :----------- | :------------------------- | :---------------------------- |
+| id          | INT          | PK, Auto Increment         |                               |
+| nip         | VARCHAR(20)  | UNIQUE, NOT NULL           |                               |
+| nama        | VARCHAR(100) | NOT NULL                   |                               |
+| jabatan     | VARCHAR(100) |                            |                               |
+| golongan    | VARCHAR(10)  |                            |                               |
+| unit_kerja  | VARCHAR(100) |                            |                               |
+| email       | VARCHAR(100) |                            |                               |
+| phone       | VARCHAR(20)  |                            |                               |
+| tmt_pangkat | DATE         |                            | Tanggal terakhir naik pangkat |
+| tmt_kgb     | DATE         |                            | Tanggal terakhir KGB          |
+| status      | ENUM         | 'aktif', 'cuti', 'pensiun' |                               |
 
 ### Tabel `approvals` (Workflow)
-| Field | Type | Constraint | Keterangan |
-| :--- | :--- | :--- | :--- |
-| id | INT | PK, Auto Increment | |
-| pegawai_id | INT | FK (pegawai.id) | |
-| type | ENUM | 'Pangkat', 'KGB', 'Lainnya' | |
-| submitted_at | TIMESTAMP | DEFAULT CURRENT_TIMESTAMP | |
-| status | ENUM | 'pending', 'approved', 'rejected' | |
-| dokumen_url | VARCHAR(255) | | Path ke folder uploads/ |
-| catatan | TEXT | | Alasan jika ditolak |
+
+| Field        | Type         | Constraint                        | Keterangan              |
+| :----------- | :----------- | :-------------------------------- | :---------------------- |
+| id           | INT          | PK, Auto Increment                |                         |
+| pegawai_id   | INT          | FK (pegawai.id)                   |                         |
+| type         | ENUM         | 'Pangkat', 'KGB', 'Lainnya'       |                         |
+| submitted_at | TIMESTAMP    | DEFAULT CURRENT_TIMESTAMP         |                         |
+| status       | ENUM         | 'pending', 'approved', 'rejected' |                         |
+| dokumen_url  | VARCHAR(255) |                                   | Path ke folder uploads/ |
+| catatan      | TEXT         |                                   | Alasan jika ditolak     |
 
 ---
 
@@ -76,10 +79,12 @@ Berikut adalah desain tabel yang dibutuhkan agar sesuai dengan data di Frontend:
 Backend Anda minimal harus menyediakan endpoint berikut:
 
 ### Auth
+
 - `POST /api/auth/login`: Mengembalikan Token JWT dan data User.
 - `PUT /api/auth/update-password`: Mengubah password user yang sedang login.
 
 ### Pegawai
+
 - `GET /api/pegawai`: List semua pegawai (dengan filter search & pagination).
 - `POST /api/pegawai`: Tambah pegawai baru (Admin only).
 - `GET /api/pegawai/:id`: Detail satu pegawai.
@@ -87,6 +92,7 @@ Backend Anda minimal harus menyediakan endpoint berikut:
 - `DELETE /api/pegawai/:id`: Hapus pegawai.
 
 ### Approval
+
 - `GET /api/approvals`: List pengajuan (Admin/Pimpinan).
 - `POST /api/approvals`: Upload dokumen pengajuan (Pegawai only).
 - `PUT /api/approvals/:id`: Proses keputusan (Approve/Reject).
@@ -94,6 +100,7 @@ Backend Anda minimal harus menyediakan endpoint berikut:
 ---
 
 ## 4. Tips Implementasi
+
 1.  **Keamanan**: Gunakan `cors` agar FE (React) bisa mengakses BE. Gunakan `helmet` untuk proteksi header.
 2.  **Validasi**: Gunakan library `joi` atau `express-validator` untuk memastikan data NIP dan Email benar sebelum masuk ke MySQL.
 3.  **File Upload**: Gunakan library `multer` untuk menangani upload file PDF/Gambar dokumen pegawai.

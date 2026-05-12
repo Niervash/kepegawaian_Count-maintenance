@@ -69,7 +69,7 @@ function Page() {
   const handleDownload = () => {
     if (!selectedApproval) return;
     const url = `http://localhost:5000${(selectedApproval as any).dokumen_url}`;
-    window.open(url, '_blank');
+    window.open(url, "_blank");
   };
 
   const toggleFullscreen = () => {
@@ -94,7 +94,12 @@ function Page() {
     setIsFullscreen(!!document.fullscreenElement);
   };
 
-  if (loading) return <AppShell title="Approval Dokumen"><div className="p-8 text-center">Memuat data...</div></AppShell>;
+  if (loading)
+    return (
+      <AppShell title="Approval Dokumen">
+        <div className="p-8 text-center">Memuat data...</div>
+      </AppShell>
+    );
 
   return (
     <AppShell title="Approval Dokumen">
@@ -109,22 +114,22 @@ function Page() {
               <p className="text-sm text-muted-foreground mt-1">
                 Pilih berkas pendukung (PDF/Gambar) untuk pengajuan
               </p>
-              <Input 
-                type="file" 
-                id="file-upload" 
-                className="hidden" 
+              <Input
+                type="file"
+                id="file-upload"
+                className="hidden"
                 onChange={async (e: React.ChangeEvent<HTMLInputElement>) => {
                   const file = e.target.files?.[0];
                   if (!file) return;
-                  
+
                   const formData = new FormData();
-                  formData.append('dokumen', file);
-                  formData.append('type', 'Lainnya'); // Default type
-                  formData.append('pegawai_id', (user as any).id);
+                  formData.append("dokumen", file);
+                  formData.append("type", "Lainnya"); // Default type
+                  formData.append("pegawai_id", (user as any).id);
 
                   try {
-                    const res = await api.post('/approvals', formData, {
-                      headers: { 'Content-Type': 'multipart/form-data' }
+                    const res = await api.post("/approvals", formData, {
+                      headers: { "Content-Type": "multipart/form-data" },
                     });
                     if (res.data.success) {
                       toast.success("Dokumen berhasil diunggah");
@@ -135,7 +140,12 @@ function Page() {
                   }
                 }}
               />
-              <Button className="mt-4" onClick={() => document.getElementById('file-upload')?.click()}>Pilih File</Button>
+              <Button
+                className="mt-4"
+                onClick={() => document.getElementById("file-upload")?.click()}
+              >
+                Pilih File
+              </Button>
             </CardContent>
           </Card>
         )}
@@ -169,11 +179,11 @@ function Page() {
                   </div>
                   <div className="flex-1 min-w-[200px]">
                     <div className="flex items-center gap-2 flex-wrap">
-                      <span className="font-semibold text-sm">{a.pegawai?.nama || 'Pegawai'}</span>
+                      <span className="font-semibold text-sm">{a.pegawai?.nama || "Pegawai"}</span>
                       <Badge variant="outline">{a.type}</Badge>
                     </div>
                     <div className="text-xs text-muted-foreground mt-1">
-                      📄 {a.dokumen_url?.split('/').pop()} • Diajukan{" "}
+                      📄 {a.dokumen_url?.split("/").pop()} • Diajukan{" "}
                       {new Date(a.submitted_at).toLocaleDateString("id-ID")}
                     </div>
                     {a.catatan && (
@@ -222,15 +232,14 @@ function Page() {
           }
         }}
       >
-        <DialogContent
-          className="max-w-4xl h-[90vh] flex flex-col p-0 overflow-hidden"
-        >
+        <DialogContent className="max-w-4xl h-[90vh] flex flex-col p-0 overflow-hidden">
           <DialogHeader className="p-4 border-b">
             <div className="flex items-center justify-between pr-8">
               <div>
                 <DialogTitle>{selectedApproval?.type}</DialogTitle>
                 <DialogDescription>
-                  {(selectedApproval as any)?.pegawai?.nama} • {(selectedApproval as any)?.dokumen_url?.split('/').pop()}
+                  {(selectedApproval as any)?.pegawai?.nama} •{" "}
+                  {(selectedApproval as any)?.dokumen_url?.split("/").pop()}
                 </DialogDescription>
               </div>
               <div className="flex gap-2">
@@ -253,12 +262,16 @@ function Page() {
             ref={previewRef}
             className="flex-1 bg-muted/50 p-8 flex items-center justify-center overflow-auto scrollbar-hide"
           >
-             <div className="w-full max-w-2xl bg-white shadow-lg p-12 min-h-[800px] flex flex-col items-center justify-center text-center">
-                <FileText className="size-24 text-muted-foreground mb-4" />
-                <h3 className="text-xl font-bold">Pratinjau Dokumen</h3>
-                <p className="text-muted-foreground mt-2">File: {(selectedApproval as any)?.dokumen_url?.split('/').pop()}</p>
-                <Button className="mt-6" variant="outline" onClick={handleDownload}>Buka Dokumen di Tab Baru</Button>
-             </div>
+            <div className="w-full max-w-2xl bg-white shadow-lg p-12 min-h-[800px] flex flex-col items-center justify-center text-center">
+              <FileText className="size-24 text-muted-foreground mb-4" />
+              <h3 className="text-xl font-bold">Pratinjau Dokumen</h3>
+              <p className="text-muted-foreground mt-2">
+                File: {(selectedApproval as any)?.dokumen_url?.split("/").pop()}
+              </p>
+              <Button className="mt-6" variant="outline" onClick={handleDownload}>
+                Buka Dokumen di Tab Baru
+              </Button>
+            </div>
           </div>
 
           <DialogFooter className="p-4 border-t bg-background">

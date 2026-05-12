@@ -61,7 +61,7 @@ function PegawaiPage() {
   const { user } = useAuth();
   const [data, setData] = useState<Pegawai[]>([]);
   const [loading, setLoading] = useState(true);
-  
+
   // Master Data States
   const [masterGolongan, setMasterGolongan] = useState<any[]>([]);
   const [masterJabatan, setMasterJabatan] = useState<any[]>([]);
@@ -90,18 +90,16 @@ function PegawaiPage() {
         api.get("/pegawai"),
         api.get("/master/golongan"),
         api.get("/master/jabatan"),
-        api.get("/master/unit-kerja")
+        api.get("/master/unit-kerja"),
       ]);
 
       if (pegawaiRes.data.success) setData(pegawaiRes.data.data);
       if (golRes.data.success) setMasterGolongan(golRes.data.data);
       if (jabRes.data.success) setMasterJabatan(golRes.data.data);
       if (unitRes.data.success) setMasterUnit(unitRes.data.data);
-
     } catch (error) {
       console.error("Gagal mengambil data pegawai:", error);
     } finally {
-
       setLoading(false);
     }
   };
@@ -113,7 +111,7 @@ function PegawaiPage() {
   const handleAccountCreate = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     if (!targetPegawai) return;
-    
+
     try {
       const response = await api.post(`/pegawai/${targetPegawai.id}/create-account`, {
         role: "pegawai",
@@ -151,7 +149,7 @@ function PegawaiPage() {
     const entryDate = f.get("tanggalMasuk") as string;
     const tmtP = (f.get("tmtPangkat") as string) || lastPangkat(entryDate);
     const tmtK = (f.get("tmtKgb") as string) || lastKgb(entryDate);
-    
+
     const newPegawai = {
       nip: f.get("nip") as string,
       nama: f.get("nama") as string,
@@ -183,7 +181,7 @@ function PegawaiPage() {
     if (!editingPegawai) return;
     const f = new FormData(e.currentTarget);
     const entryDate = f.get("tanggalMasuk") as string;
-    
+
     const updated = {
       nip: f.get("nip") as string,
       nama: f.get("nama") as string,
@@ -193,8 +191,8 @@ function PegawaiPage() {
       email: f.get("email") as string,
       phone: f.get("phone") as string,
       tanggalMasuk: entryDate,
-      tmtPangkat: f.get("tmtPangkat") as string || editingPegawai.tmtPangkat,
-      tmtKgb: f.get("tmtKgb") as string || editingPegawai.tmtKgb,
+      tmtPangkat: (f.get("tmtPangkat") as string) || editingPegawai.tmtPangkat,
+      tmtKgb: (f.get("tmtKgb") as string) || editingPegawai.tmtKgb,
     };
 
     try {
@@ -249,7 +247,12 @@ function PegawaiPage() {
   const fmt = (iso: string) =>
     new Date(iso).toLocaleDateString("id-ID", { day: "numeric", month: "long", year: "numeric" });
 
-  if (loading) return <AppShell title="Data Pegawai"><div className="p-8 text-center">Memuat data...</div></AppShell>;
+  if (loading)
+    return (
+      <AppShell title="Data Pegawai">
+        <div className="p-8 text-center">Memuat data...</div>
+      </AppShell>
+    );
 
   return (
     <AppShell title="Data Pegawai">
@@ -281,19 +284,32 @@ function PegawaiPage() {
                         <Button
                           variant="ghost"
                           size="sm"
-                          onClick={() => setFilters({ golongan: "all", unit: "all", status: "all" })}
+                          onClick={() =>
+                            setFilters({ golongan: "all", unit: "all", status: "all" })
+                          }
                           className="h-7 text-xs"
                         >
                           Reset
                         </Button>
                       </div>
                       <div className="space-y-2">
-                        <Label className="text-xs uppercase tracking-wider text-muted-foreground">Golongan</Label>
-                        <Select value={filters.golongan} onValueChange={(v) => setFilters({ ...filters, golongan: v })}>
-                          <SelectTrigger className="h-8 text-xs"><SelectValue /></SelectTrigger>
+                        <Label className="text-xs uppercase tracking-wider text-muted-foreground">
+                          Golongan
+                        </Label>
+                        <Select
+                          value={filters.golongan}
+                          onValueChange={(v) => setFilters({ ...filters, golongan: v })}
+                        >
+                          <SelectTrigger className="h-8 text-xs">
+                            <SelectValue />
+                          </SelectTrigger>
                           <SelectContent>
                             <SelectItem value="all">Semua Golongan</SelectItem>
-                            {masterGolongan.map((g) => (<SelectItem key={g.id} value={g.kode}>{g.kode}</SelectItem>))}
+                            {masterGolongan.map((g) => (
+                              <SelectItem key={g.id} value={g.kode}>
+                                {g.kode}
+                              </SelectItem>
+                            ))}
                           </SelectContent>
                         </Select>
                       </div>
@@ -304,8 +320,12 @@ function PegawaiPage() {
                   <Download className="size-4 mr-2" /> Export
                 </Button>
                 {isAdmin && (
-                  <Button className="shadow-glow flex-1 sm:flex-none w-full sm:w-auto" onClick={() => setAddOpen(true)}>
-                    <Plus className="size-4 mr-2" /> <span className="sm:inline">Tambah Pegawai</span>
+                  <Button
+                    className="shadow-glow flex-1 sm:flex-none w-full sm:w-auto"
+                    onClick={() => setAddOpen(true)}
+                  >
+                    <Plus className="size-4 mr-2" />{" "}
+                    <span className="sm:inline">Tambah Pegawai</span>
                   </Button>
                 )}
               </div>
@@ -321,7 +341,9 @@ function PegawaiPage() {
                 <tr>
                   <th className="text-left px-5 py-3 font-semibold whitespace-nowrap">Pegawai</th>
                   <th className="text-left px-5 py-3 font-semibold whitespace-nowrap">NIP</th>
-                  <th className="text-left px-5 py-3 font-semibold whitespace-nowrap hidden sm:table-cell">Masa Kerja</th>
+                  <th className="text-left px-5 py-3 font-semibold whitespace-nowrap hidden sm:table-cell">
+                    Masa Kerja
+                  </th>
                   <th className="text-left px-5 py-3 font-semibold whitespace-nowrap">Golongan</th>
                   <th className="text-right px-5 py-3 font-semibold whitespace-nowrap">Aksi</th>
                 </tr>
@@ -344,21 +366,29 @@ function PegawaiPage() {
                     <td className="px-5 py-3.5 hidden sm:table-cell">
                       <div className="flex flex-col">
                         <span className="font-medium text-xs">{getTenure(p.tanggalMasuk)}</span>
-                        <span className="text-[9px] text-muted-foreground">Sejak {p.tanggalMasuk ? new Date(p.tanggalMasuk).getFullYear() : '-'}</span>
+                        <span className="text-[9px] text-muted-foreground">
+                          Sejak {p.tanggalMasuk ? new Date(p.tanggalMasuk).getFullYear() : "-"}
+                        </span>
                       </div>
                     </td>
 
                     <td className="px-5 py-3.5">
                       <div className="flex flex-col gap-1">
-                        <Badge variant="outline" className="text-[10px]">{p.golongan}</Badge>
+                        <Badge variant="outline" className="text-[10px]">
+                          {p.golongan}
+                        </Badge>
                         {p.hasAccount && (
-                          <Badge className="bg-success/10 text-success border-0 text-[8px] h-3 w-fit">Akun Aktif</Badge>
+                          <Badge className="bg-success/10 text-success border-0 text-[8px] h-3 w-fit">
+                            Akun Aktif
+                          </Badge>
                         )}
                       </div>
                     </td>
                     <td className="px-5 py-3.5 text-right">
                       <div className="inline-flex gap-1">
-                        <Button size="sm" variant="ghost" onClick={() => openViewModal(p)}><Eye className="size-4" /></Button>
+                        <Button size="sm" variant="ghost" onClick={() => openViewModal(p)}>
+                          <Eye className="size-4" />
+                        </Button>
                         {isAdmin && (
                           <>
                             {!p.hasAccount && (
@@ -372,8 +402,17 @@ function PegawaiPage() {
                                 <UserPlus className="size-4" />
                               </Button>
                             )}
-                            <Button size="sm" variant="ghost" onClick={() => openEditModal(p)}><Pencil className="size-4" /></Button>
-                            <Button size="sm" variant="ghost" className="text-destructive hover:bg-destructive/10" onClick={() => handleDelete(p.id)}><Trash2 className="size-4" /></Button>
+                            <Button size="sm" variant="ghost" onClick={() => openEditModal(p)}>
+                              <Pencil className="size-4" />
+                            </Button>
+                            <Button
+                              size="sm"
+                              variant="ghost"
+                              className="text-destructive hover:bg-destructive/10"
+                              onClick={() => handleDelete(p.id)}
+                            >
+                              <Trash2 className="size-4" />
+                            </Button>
                           </>
                         )}
                       </div>
@@ -388,42 +427,77 @@ function PegawaiPage() {
         {/* View Modal */}
         <Dialog open={viewOpen} onOpenChange={setViewOpen}>
           <DialogContent className="max-w-2xl w-[95vw] sm:w-full">
-            <DialogHeader><DialogTitle>Profil Pegawai</DialogTitle></DialogHeader>
+            <DialogHeader>
+              <DialogTitle>Profil Pegawai</DialogTitle>
+            </DialogHeader>
             {viewingPegawai && (
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-4 max-h-[80vh] overflow-y-auto pr-2">
                 <div className="space-y-4">
                   <div className="flex items-center gap-4 p-4 rounded-2xl bg-muted/30">
-                    <div className="size-16 rounded-xl bg-gradient-primary flex items-center justify-center text-white text-2xl font-bold shrink-0">{viewingPegawai.nama.charAt(0)}</div>
+                    <div className="size-16 rounded-xl bg-gradient-primary flex items-center justify-center text-white text-2xl font-bold shrink-0">
+                      {viewingPegawai.nama.charAt(0)}
+                    </div>
                     <div className="min-w-0">
                       <div className="font-bold text-base truncate">{viewingPegawai.nama}</div>
-                      <div className="text-xs text-muted-foreground truncate">{viewingPegawai.nip}</div>
-                      <Badge className="mt-1 bg-success/10 text-success border-0 text-[10px]">{viewingPegawai.status}</Badge>
+                      <div className="text-xs text-muted-foreground truncate">
+                        {viewingPegawai.nip}
+                      </div>
+                      <Badge className="mt-1 bg-success/10 text-success border-0 text-[10px]">
+                        {viewingPegawai.status}
+                      </Badge>
                     </div>
                   </div>
                   <div className="space-y-2 text-sm">
-                    <div className="flex items-center gap-2 text-muted-foreground truncate"><Mail className="size-4 shrink-0" />{viewingPegawai.email}</div>
-                    <div className="flex items-center gap-2 text-muted-foreground truncate"><Phone className="size-4 shrink-0" />{viewingPegawai.phone}</div>
-                    <div className="flex items-center gap-2 text-muted-foreground truncate"><MapPin className="size-4 shrink-0" />{viewingPegawai.unitKerja}</div>
-                    <div className="flex items-center gap-2 text-muted-foreground truncate"><Briefcase className="size-4 shrink-0" />{viewingPegawai.jabatan}</div>
-                    <div className="flex items-center gap-2 text-muted-foreground truncate"><Clock className="size-4 shrink-0" />Masa Kerja: {getTenure(viewingPegawai.tanggalMasuk)}</div>
+                    <div className="flex items-center gap-2 text-muted-foreground truncate">
+                      <Mail className="size-4 shrink-0" />
+                      {viewingPegawai.email}
+                    </div>
+                    <div className="flex items-center gap-2 text-muted-foreground truncate">
+                      <Phone className="size-4 shrink-0" />
+                      {viewingPegawai.phone}
+                    </div>
+                    <div className="flex items-center gap-2 text-muted-foreground truncate">
+                      <MapPin className="size-4 shrink-0" />
+                      {viewingPegawai.unitKerja}
+                    </div>
+                    <div className="flex items-center gap-2 text-muted-foreground truncate">
+                      <Briefcase className="size-4 shrink-0" />
+                      {viewingPegawai.jabatan}
+                    </div>
+                    <div className="flex items-center gap-2 text-muted-foreground truncate">
+                      <Clock className="size-4 shrink-0" />
+                      Masa Kerja: {getTenure(viewingPegawai.tanggalMasuk)}
+                    </div>
                   </div>
                 </div>
                 <div className="space-y-3">
                   <div className="p-4 rounded-xl border border-border bg-muted/20">
-                     <div className="grid grid-cols-2 gap-2 text-xs">
-                        <div className="text-muted-foreground">TMT Pangkat Terakhir:</div>
-                        <div className="font-mono font-bold text-primary">{viewingPegawai.tmtPangkat?.split('T')[0] || '-'}</div>
-                        <div className="text-muted-foreground">TMT KGB Terakhir:</div>
-                        <div className="font-mono font-bold text-success">{viewingPegawai.tmtKgb?.split('T')[0] || '-'}</div>
-                     </div>
+                    <div className="grid grid-cols-2 gap-2 text-xs">
+                      <div className="text-muted-foreground">TMT Pangkat Terakhir:</div>
+                      <div className="font-mono font-bold text-primary">
+                        {viewingPegawai.tmtPangkat?.split("T")[0] || "-"}
+                      </div>
+                      <div className="text-muted-foreground">TMT KGB Terakhir:</div>
+                      <div className="font-mono font-bold text-success">
+                        {viewingPegawai.tmtKgb?.split("T")[0] || "-"}
+                      </div>
+                    </div>
                   </div>
                   <div className="p-4 rounded-xl border border-primary/20 bg-primary/5">
-                    <Label className="text-[10px] font-bold uppercase tracking-wider text-primary">Estimasi Naik Pangkat</Label>
-                    <div className="text-sm font-bold flex items-center gap-2 mt-1"><Calendar className="size-4" /> {fmt(nextPangkat(viewingPegawai))}</div>
+                    <Label className="text-[10px] font-bold uppercase tracking-wider text-primary">
+                      Estimasi Naik Pangkat
+                    </Label>
+                    <div className="text-sm font-bold flex items-center gap-2 mt-1">
+                      <Calendar className="size-4" /> {fmt(nextPangkat(viewingPegawai))}
+                    </div>
                   </div>
                   <div className="p-4 rounded-xl border border-success/20 bg-success/5">
-                    <Label className="text-[10px] font-bold uppercase tracking-wider text-success">Estimasi KGB</Label>
-                    <div className="text-sm font-bold flex items-center gap-2 mt-1"><Wallet className="size-4" /> {fmt(nextKgb(viewingPegawai))}</div>
+                    <Label className="text-[10px] font-bold uppercase tracking-wider text-success">
+                      Estimasi KGB
+                    </Label>
+                    <div className="text-sm font-bold flex items-center gap-2 mt-1">
+                      <Wallet className="size-4" /> {fmt(nextKgb(viewingPegawai))}
+                    </div>
                   </div>
                 </div>
               </div>
@@ -434,15 +508,34 @@ function PegawaiPage() {
         {/* Add Modal */}
         <Dialog open={addOpen} onOpenChange={setAddOpen}>
           <DialogContent className="max-w-lg w-[95vw] sm:w-full">
-            <DialogHeader><DialogTitle>Tambah Pegawai</DialogTitle></DialogHeader>
-            <form onSubmit={handleAdd} className="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-4 max-h-[80vh] overflow-y-auto px-1">
-              <div className="sm:col-span-2 space-y-1.5"><Label>Nama Lengkap</Label><Input name="nama" placeholder="Masukkan nama lengkap dengan gelar..." required /></div>
-              <div><Label>NIP</Label><Input name="nip" placeholder="19XXXXXXXXXXXXXXXX" required /></div>
+            <DialogHeader>
+              <DialogTitle>Tambah Pegawai</DialogTitle>
+            </DialogHeader>
+            <form
+              onSubmit={handleAdd}
+              className="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-4 max-h-[80vh] overflow-y-auto px-1"
+            >
+              <div className="sm:col-span-2 space-y-1.5">
+                <Label>Nama Lengkap</Label>
+                <Input name="nama" placeholder="Masukkan nama lengkap dengan gelar..." required />
+              </div>
+              <div>
+                <Label>NIP</Label>
+                <Input name="nip" placeholder="19XXXXXXXXXXXXXXXX" required />
+              </div>
               <div>
                 <Label>Golongan</Label>
                 <Select name="golongan_id" required>
-                  <SelectTrigger><SelectValue placeholder="Pilih Golongan" /></SelectTrigger>
-                  <SelectContent>{masterGolongan.map(g => <SelectItem key={g.id} value={g.id.toString()}>{g.kode}</SelectItem>)}</SelectContent>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Pilih Golongan" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {masterGolongan.map((g) => (
+                      <SelectItem key={g.id} value={g.id.toString()}>
+                        {g.kode}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
                 </Select>
               </div>
               <div className="sm:col-span-2 space-y-1.5">
@@ -452,20 +545,46 @@ function PegawaiPage() {
               <div className="sm:col-span-2 space-y-1.5">
                 <Label>Jabatan</Label>
                 <Select name="jabatan_id" required>
-                  <SelectTrigger><SelectValue placeholder="Pilih Jabatan" /></SelectTrigger>
-                  <SelectContent>{masterJabatan.map(j => <SelectItem key={j.id} value={j.id.toString()}>{j.nama}</SelectItem>)}</SelectContent>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Pilih Jabatan" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {masterJabatan.map((j) => (
+                      <SelectItem key={j.id} value={j.id.toString()}>
+                        {j.nama}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
                 </Select>
               </div>
               <div className="sm:col-span-2 space-y-1.5">
                 <Label>Unit Kerja</Label>
                 <Select name="unit_kerja_id" required>
-                  <SelectTrigger><SelectValue placeholder="Pilih Unit Kerja" /></SelectTrigger>
-                  <SelectContent>{masterUnit.map(u => <SelectItem key={u.id} value={u.id.toString()}>{u.nama}</SelectItem>)}</SelectContent>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Pilih Unit Kerja" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {masterUnit.map((u) => (
+                      <SelectItem key={u.id} value={u.id.toString()}>
+                        {u.nama}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
                 </Select>
               </div>
-              <div><Label>Telepon</Label><Input name="phone" placeholder="08XXXXXXXXXX" required /></div>
-              <div><Label>Email</Label><Input name="email" type="email" placeholder="nama@sikapas.go.id" required /></div>
-              <DialogFooter className="sm:col-span-2 mt-4"><Button type="submit" className="w-full">Simpan Data</Button></DialogFooter>
+              <div>
+                <Label>Telepon</Label>
+                <Input name="phone" placeholder="08XXXXXXXXXX" required />
+              </div>
+              <div>
+                <Label>Email</Label>
+                <Input name="email" type="email" placeholder="nama@sikapas.go.id" required />
+              </div>
+              <DialogFooter className="sm:col-span-2 mt-4">
+                <Button type="submit" className="w-full">
+                  Simpan Data
+                </Button>
+              </DialogFooter>
             </form>
           </DialogContent>
         </Dialog>
@@ -473,39 +592,107 @@ function PegawaiPage() {
         {/* Edit Modal */}
         <Dialog open={editOpen} onOpenChange={setEditOpen}>
           <DialogContent className="max-w-lg w-[95vw] sm:w-full">
-            <DialogHeader><DialogTitle>Edit Data Pegawai</DialogTitle></DialogHeader>
+            <DialogHeader>
+              <DialogTitle>Edit Data Pegawai</DialogTitle>
+            </DialogHeader>
             {editingPegawai && (
-              <form onSubmit={handleEdit} className="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-4 max-h-[80vh] overflow-y-auto px-1">
-                <div className="sm:col-span-2 space-y-1.5"><Label>Nama Lengkap</Label><Input name="nama" defaultValue={editingPegawai.nama} required /></div>
-                <div><Label>NIP</Label><Input name="nip" defaultValue={editingPegawai.nip} required /></div>
+              <form
+                onSubmit={handleEdit}
+                className="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-4 max-h-[80vh] overflow-y-auto px-1"
+              >
+                <div className="sm:col-span-2 space-y-1.5">
+                  <Label>Nama Lengkap</Label>
+                  <Input name="nama" defaultValue={editingPegawai.nama} required />
+                </div>
+                <div>
+                  <Label>NIP</Label>
+                  <Input name="nip" defaultValue={editingPegawai.nip} required />
+                </div>
                 <div>
                   <Label>Golongan</Label>
-                  <Select name="golongan_id" defaultValue={masterGolongan.find(g => g.kode === editingPegawai.golongan)?.id?.toString()} required>
-                    <SelectTrigger><SelectValue /></SelectTrigger>
-                    <SelectContent>{masterGolongan.map(g => <SelectItem key={g.id} value={g.id.toString()}>{g.kode}</SelectItem>)}</SelectContent>
+                  <Select
+                    name="golongan_id"
+                    defaultValue={masterGolongan
+                      .find((g) => g.kode === editingPegawai.golongan)
+                      ?.id?.toString()}
+                    required
+                  >
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {masterGolongan.map((g) => (
+                        <SelectItem key={g.id} value={g.id.toString()}>
+                          {g.kode}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
                   </Select>
                 </div>
                 <div className="sm:col-span-2 space-y-1.5">
                   <Label>Tanggal Masuk CPNS</Label>
-                  <Input name="tanggalMasuk" type="date" defaultValue={editingPegawai.tanggalMasuk?.split('T')[0]} required />
+                  <Input
+                    name="tanggalMasuk"
+                    type="date"
+                    defaultValue={editingPegawai.tanggalMasuk?.split("T")[0]}
+                    required
+                  />
                 </div>
                 <div className="sm:col-span-2 space-y-1.5">
                   <Label>Jabatan</Label>
-                  <Select name="jabatan_id" defaultValue={masterJabatan.find(j => j.nama === editingPegawai.jabatan)?.id?.toString()} required>
-                    <SelectTrigger><SelectValue /></SelectTrigger>
-                    <SelectContent>{masterJabatan.map(j => <SelectItem key={j.id} value={j.id.toString()}>{j.nama}</SelectItem>)}</SelectContent>
+                  <Select
+                    name="jabatan_id"
+                    defaultValue={masterJabatan
+                      .find((j) => j.nama === editingPegawai.jabatan)
+                      ?.id?.toString()}
+                    required
+                  >
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {masterJabatan.map((j) => (
+                        <SelectItem key={j.id} value={j.id.toString()}>
+                          {j.nama}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
                   </Select>
                 </div>
                 <div className="sm:col-span-2 space-y-1.5">
                   <Label>Unit Kerja</Label>
-                  <Select name="unit_kerja_id" defaultValue={masterUnit.find(u => u.nama === editingPegawai.unitKerja)?.id?.toString()} required>
-                    <SelectTrigger><SelectValue /></SelectTrigger>
-                    <SelectContent>{masterUnit.map(u => <SelectItem key={u.id} value={u.id.toString()}>{u.nama}</SelectItem>)}</SelectContent>
+                  <Select
+                    name="unit_kerja_id"
+                    defaultValue={masterUnit
+                      .find((u) => u.nama === editingPegawai.unitKerja)
+                      ?.id?.toString()}
+                    required
+                  >
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {masterUnit.map((u) => (
+                        <SelectItem key={u.id} value={u.id.toString()}>
+                          {u.nama}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
                   </Select>
                 </div>
-                <div><Label>Telepon</Label><Input name="phone" defaultValue={editingPegawai.phone} required /></div>
-                <div><Label>Email</Label><Input name="email" type="email" defaultValue={editingPegawai.email} required /></div>
-                <DialogFooter className="sm:col-span-2 mt-4"><Button type="submit" className="w-full">Simpan Perubahan</Button></DialogFooter>
+                <div>
+                  <Label>Telepon</Label>
+                  <Input name="phone" defaultValue={editingPegawai.phone} required />
+                </div>
+                <div>
+                  <Label>Email</Label>
+                  <Input name="email" type="email" defaultValue={editingPegawai.email} required />
+                </div>
+                <DialogFooter className="sm:col-span-2 mt-4">
+                  <Button type="submit" className="w-full">
+                    Simpan Perubahan
+                  </Button>
+                </DialogFooter>
               </form>
             )}
           </DialogContent>

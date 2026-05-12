@@ -58,7 +58,7 @@ const addYears = (date: Date | string, y: number) => {
 
 // Helper to calculate the most recent (last) TMT based on cycle
 export function lastPangkat(entryDate: string) {
-  if (!entryDate) return new Date().toISOString().split('T')[0];
+  if (!entryDate) return new Date().toISOString().split("T")[0];
   const start = new Date(entryDate);
   const now = new Date();
   let last = new Date(start);
@@ -68,11 +68,11 @@ export function lastPangkat(entryDate: string) {
     if (next > now) break;
     last = next;
   }
-  return last.toISOString().split('T')[0];
+  return last.toISOString().split("T")[0];
 }
 
 export function lastKgb(entryDate: string) {
-  if (!entryDate) return new Date().toISOString().split('T')[0];
+  if (!entryDate) return new Date().toISOString().split("T")[0];
   const start = new Date(entryDate);
   const now = new Date();
   let last = new Date(start);
@@ -82,18 +82,18 @@ export function lastKgb(entryDate: string) {
     if (next > now) break;
     last = next;
   }
-  return last.toISOString().split('T')[0];
+  return last.toISOString().split("T")[0];
 }
 
 // Compute next dates (Siklus 4 tahun pangkat, 2 tahun KGB)
 export function nextPangkat(p: Pegawai) {
   const baseDate = p.tmtPangkat || p.tanggalMasuk;
   if (!baseDate) return new Date().toISOString();
-  
+
   const start = new Date(baseDate);
   const now = new Date();
-  let next = new Date(start);
-  
+  const next = new Date(start);
+
   // If the provided TMT is already in the past or today, find the first future anniversary
   // using the 4-year cycle from that base.
   while (next <= now) {
@@ -108,8 +108,8 @@ export function nextKgb(p: Pegawai) {
 
   const start = new Date(baseDate);
   const now = new Date();
-  let next = new Date(start);
-  
+  const next = new Date(start);
+
   while (next <= now) {
     next.setFullYear(next.getFullYear() + 2);
   }
