@@ -1,5 +1,6 @@
 import { createContext, useContext, useEffect, useState, type ReactNode } from "react";
 import { type User } from "./simpeg-data";
+import api from "@/services/api";
 
 interface AuthCtx {
   user: User | null;
@@ -28,6 +29,39 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
     return null;
   });
+
+  useEffect(() => {
+    const fetchMe = async () => {
+      const token = localStorage.getItem("sikapas_token");
+      if (token) {
+        try {
+          const response = await api.get("/auth/me");
+          if (response.data.success) {
+            const userData = response.data.data;
+            // The /auth/me might return nested pegawai data, 
+            // but for context we want the user object with flattened jabatan/nip if possible
+            // or just the user object. 
+            // Based on backend getMe, it returns user with included pegawai.
+            
+            const flattenedUser = {
+              ...userData,
+              jabatan: userData.jabatan || userData.pegawai?.jabatan?.nama || userData.pegawai?.jabatan || "",
+              nip: userData.nip || userData.pegawai?.nip || "",
+            };
+            
+            localStorage.setItem("sikapas_user", JSON.stringify(flattenedUser));
+            setUser(flattenedUser);
+          }
+        } catch (error) {
+          console.error("Failed to fetch user data", error);
+          // If 401, maybe logout? 
+          // logout(); 
+        }
+      }
+    };
+
+    fetchMe();
+  }, []);
 
   const login = (userData: User, token: string) => {
     localStorage.setItem("sikapas_token", token);

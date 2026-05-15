@@ -292,17 +292,25 @@ function Dashboard() {
                                 size="sm"
                                 variant="ghost"
                                 className="h-8 px-2 w-full sm:w-auto justify-center"
-                                asChild
+                                onClick={async () => {
+                                  try {
+                                    const response = await api.get(`/dokumen/download/${doc.id}`, {
+                                      responseType: "blob",
+                                    });
+                                    const url = window.URL.createObjectURL(new Blob([response.data]));
+                                    const link = document.createElement("a");
+                                    link.href = url;
+                                    link.setAttribute("download", `${doc.name}.${doc.type.toLowerCase()}`);
+                                    document.body.appendChild(link);
+                                    link.click();
+                                    link.remove();
+                                  } catch (error) {
+                                    toast.error("Gagal mengunduh dokumen");
+                                  }
+                                }}
                               >
-                                <a
-                                  href={`http://localhost:5000${doc.file_url}`}
-                                  target="_blank"
-                                  rel="noreferrer"
-                                  download
-                                >
-                                  <Download className="size-4 mr-2 sm:mr-0" />
-                                  <span className="sm:hidden">Download</span>
-                                </a>
+                                <Download className="size-4 mr-2 sm:mr-0" />
+                                <span className="sm:hidden">Download</span>
                               </Button>
                             </div>
                           </div>
