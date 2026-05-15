@@ -1,4 +1,4 @@
-import { Link, useRouterState } from "@tanstack/react-router";
+import { Link, useRouterState, useNavigate } from "@tanstack/react-router";
 import {
   LayoutDashboard,
   Users,
@@ -61,7 +61,13 @@ const masterItems = [
 export function AppSidebar() {
   const path = useRouterState({ select: (s) => s.location.pathname });
   const { user, logout } = useAuth();
+  const navigate = useNavigate();
   const { state } = useSidebar();
+
+  const handleLogout = () => {
+    logout();
+    navigate({ to: "/login" });
+  };
 
   if (!user) return null;
   const items = navItems.filter((i) => i.roles.includes(user.role));
@@ -186,7 +192,7 @@ export function AppSidebar() {
               </div>
             </div>
             <button
-              onClick={logout}
+              onClick={handleLogout}
               className="p-1.5 rounded-md hover:bg-sidebar-accent text-sidebar-foreground/70 hover:text-sidebar-foreground transition-colors"
               title="Logout"
             >

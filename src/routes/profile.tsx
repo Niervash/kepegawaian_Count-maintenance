@@ -90,7 +90,9 @@ function Page() {
     }
   };
 
-  const avatarUrl = user.avatar ? `http://localhost:5000${user.avatar}` : null;
+  const avatarUrl = user.avatar
+    ? `https://prozac-dainty-antiquely.ngrok-free.dev${user.avatar}`
+    : null;
 
   return (
     <AppShell title="Profile">
