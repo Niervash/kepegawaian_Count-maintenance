@@ -10,7 +10,15 @@ import {
   DialogTitle,
   DialogTrigger,
   DialogDescription,
+  DialogFooter,
 } from "@/components/ui/dialog";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { useAuth } from "@/lib/auth-context";
 import {
   type ImportantDoc,
@@ -62,8 +70,33 @@ export const Route = createFileRoute("/dashboard")({ component: Dashboard });
 function Dashboard() {
   const { user } = useAuth();
   const [docs, setDocs] = useState<ImportantDoc[]>([]);
+  const [isSubmitDocOpen, setIsSubmitDocOpen] = useState(false);
   const [isAddDocOpen, setIsAddDocOpen] = useState(false);
   const [newDoc, setNewDoc] = useState({ name: "", type: "PDF", size: "" });
+  const [submissionData, setSubmissionData] = useState({ type: "Kenaikan Pangkat", files: [] as File[] });
+
+  const handleDocSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (submissionData.files.length === 0) {
+      toast.error("Pilih setidaknya satu file dokumen");
+      return;
+    }
+    const formData = new FormData();
+    formData.append("type", submissionData.type);
+    submissionData.files.forEach((file) => {
+      formData.append("files", file);
+    });
+    try {
+      await api.post("/approvals", formData, {
+        headers: { "Content-Type": "multipart/form-data" },
+      });
+      toast.success("Dokumen-dokumen berhasil dikirim ke Admin");
+      setIsSubmitDocOpen(false);
+      setSubmissionData({ type: "Kenaikan Pangkat", files: [] });
+    } catch (error) {
+      toast.error("Gagal mengirim dokumen");
+    }
+  };
 
   // Dashboard Data States
   const [stats, setStats] = useState<any>(null);
@@ -241,14 +274,21 @@ function Dashboard() {
               </p>
             </div>
             <div className="flex flex-col sm:flex-row sm:flex-wrap gap-3">
-              <Button
-                asChild
-                className="w-full sm:w-auto bg-white text-primary hover:bg-white/90 shadow-glow"
-              >
-                <Link to={isPegawai ? "/kenaikan-pangkat" : "/reminder"}>
-                  {isPegawai ? "Ajukan Dokumen" : "Lihat Reminder"}
-                </Link>
-              </Button>
+              {isPegawai ? (
+                <Button
+                  onClick={() => setIsSubmitDocOpen(true)}
+                  className="w-full sm:w-auto bg-white text-primary hover:bg-white/90 shadow-glow"
+                >
+                  Kirim Dokumen KGB/Pangkat
+                </Button>
+              ) : (
+                <Button
+                  asChild
+                  className="w-full sm:w-auto bg-white text-primary hover:bg-white/90 shadow-glow"
+                >
+                  <Link to="/reminder">Lihat Reminder</Link>
+                </Button>
+              )}
 
               {isPegawai ? (
                 <>
@@ -331,67 +371,71 @@ function Dashboard() {
                           <Plus className="size-4 mr-2" /> Kelola Format Surat
                         </Button>
                       </DialogTrigger>
-                      <DialogContent className="max-w-2xl bg-card w-[95vw] sm:w-full">
-                        <DialogHeader>
-                          <DialogTitle>Manajemen Format Surat</DialogTitle>
-                          <DialogDescription>Tambahkan atau hapus format surat.</DialogDescription>
+                      <DialogContent className="w-[90vw] sm:max-w-[500px] p-6 gap-6 rounded-2xl">
+                        <DialogHeader className="gap-1.5">
+                          <DialogTitle className="text-xl">Manajemen Format Surat</DialogTitle>
+                          <DialogDescription>
+                            Tambahkan atau hapus templat surat untuk kebutuhan administrasi.
+                          </DialogDescription>
                         </DialogHeader>
 
                         <form
                           onSubmit={handleAddDoc}
-                          className="space-y-4 mt-4 p-4 border rounded-xl bg-muted/20"
+                          className="space-y-5 bg-muted/20 p-5 rounded-xl border border-border"
                         >
-                          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                            <div className="space-y-2">
-                              <Label>Nama Dokumen</Label>
-                              <Input
-                                placeholder="Contoh: Template SKP..."
-                                value={newDoc.name}
-                                onChange={(e) => setNewDoc({ ...newDoc, name: e.target.value })}
-                              />
-                            </div>
-                            <div className="space-y-2">
-                              <Label>Pilih File (Max 2MB)</Label>
-                              <Input
-                                type="file"
-                                className="cursor-pointer"
-                                onChange={handleFileChange}
-                                accept=".pdf,.docx,.doc,.xlsx,.xls"
-                              />
-                              {newDoc.size && (
-                                <p className="text-[10px] text-primary font-medium">
-                                  Ukuran: {newDoc.size}
-                                </p>
-                              )}
-                            </div>
+                          <div className="space-y-2">
+                            <Label className="text-sm font-medium">Nama Dokumen</Label>
+                            <Input
+                              placeholder="Contoh: Template SKP..."
+                              value={newDoc.name}
+                              onChange={(e) => setNewDoc({ ...newDoc, name: e.target.value })}
+                              className="h-11"
+                            />
                           </div>
-                          <Button type="submit" className="w-full">
+                          <div className="space-y-2">
+                            <Label className="text-sm font-medium">Berkas Dokumen</Label>
+                            <Input
+                              type="file"
+                              className="cursor-pointer h-12 pt-2.5 file:mr-4 file:py-1.5 file:px-3 file:rounded-md file:border-0 file:text-xs file:font-semibold file:bg-primary/10 file:text-primary hover:file:bg-primary/20 transition-all border-dashed"
+                              onChange={handleFileChange}
+                              accept=".pdf,.docx,.doc"
+                            />
+                            {newDoc.size && (
+                              <p className="text-[11px] text-primary font-medium mt-1">
+                                Ukuran: {newDoc.size}
+                              </p>
+                            )}
+                          </div>
+                          <Button type="submit" className="w-full h-11 shadow-sm">
                             Tambahkan Dokumen
                           </Button>
                         </form>
 
-                        <div className="mt-6 space-y-3 max-h-[300px] overflow-y-auto pr-2">
+                        <div className="space-y-3 max-h-[300px] overflow-y-auto pr-1">
+                          <h4 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                            Daftar Dokumen Saat Ini
+                          </h4>
                           {docs.map((doc) => (
                             <div
                               key={doc.id}
-                              className="flex items-center justify-between p-3 border rounded-lg"
+                              className="flex items-center justify-between p-3 border border-border rounded-lg bg-card"
                             >
-                              <span className="text-sm font-medium truncate pr-2">
-                                {doc.name} ({doc.size})
-                              </span>
+                              <div className="min-w-0 pr-2">
+                                <p className="text-sm font-medium truncate">{doc.name}</p>
+                                <p className="text-[10px] text-muted-foreground">{doc.size}</p>
+                              </div>
                               <Button
                                 variant="ghost"
                                 size="sm"
                                 onClick={() => handleDeleteDoc(doc.id)}
-                                className="shrink-0"
+                                className="size-8 p-0 hover:bg-destructive/10"
                               >
                                 <Trash2 className="size-4 text-destructive" />
                               </Button>
                             </div>
                           ))}
                         </div>
-                      </DialogContent>
-                    </Dialog>
+                      </DialogContent>                    </Dialog>
                   )}
                   <Button
                     asChild
@@ -406,6 +450,71 @@ function Dashboard() {
           </div>
         </div>
 
+        {isPegawai && (
+          <Dialog open={isSubmitDocOpen} onOpenChange={setIsSubmitDocOpen}>
+            <DialogContent className="w-[90vw] sm:max-w-[450px] p-6 gap-6 rounded-2xl">
+              <DialogHeader className="gap-1.5">
+                <DialogTitle className="text-xl">Kirim Berkas Administrasi</DialogTitle>
+                <DialogDescription>
+                  Pilih jenis pengajuan dan unggah dokumen pendukung dalam format PDF atau DOCX.
+                </DialogDescription>
+              </DialogHeader>
+
+              <form onSubmit={handleDocSubmit} className="space-y-5">
+                <div className="space-y-2">
+                  <Label className="text-sm font-medium">Jenis Pengajuan</Label>
+                  <Select
+                    value={submissionData.type}
+                    onValueChange={(val) => setSubmissionData({ ...submissionData, type: val })}
+                  >
+                    <SelectTrigger className="h-11">
+                      <SelectValue placeholder="Pilih jenis..." />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="Kenaikan Pangkat">Kenaikan Pangkat</SelectItem>
+                      <SelectItem value="KGB">KGB</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                <div className="space-y-2">
+                  <Label className="text-sm font-medium">Berkas Dokumen</Label>
+                  <div className="relative group">
+                    <Input
+                      type="file"
+                      multiple
+                      className="cursor-pointer h-12 pt-2.5 file:mr-4 file:py-1.5 file:px-3 file:rounded-md file:border-0 file:text-xs file:font-semibold file:bg-primary/10 file:text-primary hover:file:bg-primary/20 transition-all border-dashed"
+                      onChange={(e) =>
+                        setSubmissionData({
+                          ...submissionData,
+                          files: e.target.files ? Array.from(e.target.files) : [],
+                        })
+                      }
+                      accept=".pdf,.docx,.doc"
+                    />
+                  </div>
+                  <p className="text-[11px] text-muted-foreground flex items-center gap-1.5 pt-1">
+                    <span className="opacity-70">Maks. 2MB per file • Format: PDF, DOCX</span>
+                  </p>
+                </div>
+
+                <DialogFooter className="pt-2">
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    onClick={() => setIsSubmitDocOpen(false)}
+                    className="w-full sm:w-auto"
+                  >
+                    Batal
+                  </Button>
+                  <Button type="submit" className="w-full sm:w-auto shadow-sm">
+                    Kirim Sekarang
+                  </Button>
+                </DialogFooter>
+              </form>
+            </DialogContent>
+          </Dialog>
+        )}
         {/* Stats Grid */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
           {(isPegawai

@@ -45,8 +45,8 @@ const navItems = [
     roles: ["admin", "pimpinan", "pegawai"],
   },
   { to: "/kgb", label: "KGB", icon: Wallet, roles: ["admin", "pimpinan", "pegawai"] },
-  { to: "/reminder", label: "Reminder", icon: Bell, roles: ["admin", "pimpinan", "pegawai"] },
   { to: "/approval", label: "Approval Dokumen", icon: FileCheck, roles: ["admin", "pimpinan"] },
+
   { to: "/kalender", label: "Kalender", icon: Calendar, roles: ["admin", "pimpinan", "pegawai"] },
   { to: "/laporan", label: "Laporan", icon: FileBarChart, roles: ["admin", "pimpinan"] },
   { to: "/profile", label: "Profile", icon: UserCircle, roles: ["admin", "pimpinan", "pegawai"] },

@@ -351,9 +351,6 @@ function PegawaiPage() {
                     </div>
                   </PopoverContent>
                 </Popover>
-                <Button variant="outline" onClick={() => {}} className="flex-1 sm:flex-none">
-                  <Download className="size-4 mr-2" /> Export
-                </Button>
                 {isAdmin && (
                   <Button
                     className="shadow-glow flex-1 sm:flex-none w-full sm:w-auto"
@@ -471,84 +468,54 @@ function PegawaiPage() {
 
         {/* View Modal */}
         <Dialog open={viewOpen} onOpenChange={setViewOpen}>
-          <DialogContent className="max-w-2xl w-[95vw] sm:w-full">
+          <DialogContent className="w-[90vw] sm:max-w-[450px] p-6 gap-6 rounded-2xl">
             <DialogHeader>
-              <DialogTitle>Profil Pegawai</DialogTitle>
+              <DialogTitle className="text-xl">Profil Pegawai</DialogTitle>
             </DialogHeader>
             {viewingPegawai && (
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-4 max-h-[80vh] overflow-y-auto pr-2">
-                <div className="space-y-4">
-                  <div className="flex items-center gap-4 p-4 rounded-2xl bg-muted/30">
-                    <div className="size-16 rounded-xl bg-muted border border-border flex items-center justify-center text-white text-2xl font-bold shrink-0 overflow-hidden">
-                      {viewingPegawai.avatar ? (
-                        <img
-                          src={`http://localhost:5000${viewingPegawai.avatar}`}
-                          alt={viewingPegawai.nama}
-                          className="size-full object-cover"
-                        />
-                      ) : (
-                        <div className="size-full bg-gradient-primary flex items-center justify-center text-white">
-                          {viewingPegawai.nama.charAt(0)}
-                        </div>
-                      )}
-                    </div>
-                    <div className="min-w-0">
-                      <div className="font-bold text-base truncate">{viewingPegawai.nama}</div>
-                      <div className="text-xs text-muted-foreground truncate">
-                        {viewingPegawai.nip}
-                      </div>
-                      <Badge className="mt-1 bg-success/10 text-success border-0 text-[10px]">
-                        {viewingPegawai.status}
-                      </Badge>
-                    </div>
+              <div className="space-y-6">
+                <div className="flex flex-col items-center text-center gap-3">
+                  <div className="size-24 rounded-2xl bg-gradient-primary flex items-center justify-center text-white text-3xl font-bold shadow-elevated overflow-hidden border-4 border-background">
+                    {viewingPegawai.avatar ? (
+                      <img
+                        src={`http://localhost:5000${viewingPegawai.avatar}`}
+                        alt={viewingPegawai.nama}
+                        className="size-full object-cover"
+                      />
+                    ) : (
+                      viewingPegawai.nama.charAt(0)
+                    )}
                   </div>
-                  <div className="space-y-2 text-sm">
-                    <div className="flex items-center gap-2 text-muted-foreground truncate">
-                      <Mail className="size-4 shrink-0" />
-                      {viewingPegawai.email}
-                    </div>
-                    <div className="flex items-center gap-2 text-muted-foreground truncate">
-                      <Phone className="size-4 shrink-0" />
-                      {viewingPegawai.phone}
-                    </div>
-                    <div className="flex items-center gap-2 text-muted-foreground truncate">
-                      <Briefcase className="size-4 shrink-0" />
-                      {viewingPegawai.jabatan}
-                    </div>
-                    <div className="flex items-center gap-2 text-muted-foreground truncate">
-                      <Clock className="size-4 shrink-0" />
-                      Masa Kerja: {getTenure(viewingPegawai.tanggalMasuk)}
-                    </div>
+                  <div>
+                    <h3 className="font-bold text-lg">{viewingPegawai.nama}</h3>
+                    <p className="text-xs text-muted-foreground">{viewingPegawai.jabatan}</p>
                   </div>
                 </div>
-                <div className="space-y-3">
-                  <div className="p-4 rounded-xl border border-border bg-muted/20">
-                    <div className="grid grid-cols-2 gap-2 text-xs">
-                      <div className="text-muted-foreground">TMT Pangkat Terakhir:</div>
-                      <div className="font-mono font-bold text-primary">
-                        {viewingPegawai.tmtPangkat?.split("T")[0] || "-"}
-                      </div>
-                      <div className="text-muted-foreground">TMT KGB Terakhir:</div>
-                      <div className="font-mono font-bold text-success">
-                        {viewingPegawai.tmtKgb?.split("T")[0] || "-"}
-                      </div>
-                    </div>
+
+                <div className="grid grid-cols-2 gap-4 pt-2 border-t border-border">
+                  <div className="space-y-1">
+                    <p className="text-[10px] uppercase font-bold text-muted-foreground">NIP</p>
+                    <p className="text-sm font-mono">{viewingPegawai.nip}</p>
                   </div>
-                  <div className="p-4 rounded-xl border border-primary/20 bg-primary/5">
-                    <Label className="text-[10px] font-bold uppercase tracking-wider text-primary">
-                      Estimasi Naik Pangkat
-                    </Label>
-                    <div className="text-sm font-bold flex items-center gap-2 mt-1">
-                      <Calendar className="size-4" /> {fmt(nextPangkat(viewingPegawai))}
-                    </div>
+                  <div className="space-y-1">
+                    <p className="text-[10px] uppercase font-bold text-muted-foreground">Golongan</p>
+                    <p className="text-sm font-medium">{viewingPegawai.golongan}</p>
                   </div>
-                  <div className="p-4 rounded-xl border border-success/20 bg-success/5">
-                    <Label className="text-[10px] font-bold uppercase tracking-wider text-success">
-                      Estimasi KGB
-                    </Label>
-                    <div className="text-sm font-bold flex items-center gap-2 mt-1">
-                      <Wallet className="size-4" /> {fmt(nextKgb(viewingPegawai))}
-                    </div>
+                  <div className="space-y-1">
+                    <p className="text-[10px] uppercase font-bold text-muted-foreground">Telepon</p>
+                    <p className="text-sm text-muted-foreground">{viewingPegawai.phone}</p>
+                  </div>
+                  <div className="space-y-1">
+                    <p className="text-[10px] uppercase font-bold text-muted-foreground">Email</p>
+                    <p className="text-sm text-muted-foreground break-all">{viewingPegawai.email}</p>
+                  </div>
+                  <div className="space-y-1">
+                    <p className="text-[10px] uppercase font-bold text-muted-foreground">Masa Kerja</p>
+                    <p className="text-sm text-primary font-semibold">{getTenure(viewingPegawai.tanggalMasuk)}</p>
+                  </div>
+                  <div className="space-y-1">
+                    <p className="text-[10px] uppercase font-bold text-muted-foreground">Status</p>
+                    <Badge variant="outline" className="capitalize">{viewingPegawai.status}</Badge>
                   </div>
                 </div>
               </div>
@@ -558,15 +525,12 @@ function PegawaiPage() {
 
         {/* Add Modal */}
         <Dialog open={addOpen} onOpenChange={setAddOpen}>
-          <DialogContent className="max-w-lg w-[95vw] sm:w-full">
+          <DialogContent className="w-[90vw] sm:max-w-[450px] p-6 rounded-2xl">
             <DialogHeader>
-              <DialogTitle>Tambah Pegawai</DialogTitle>
+              <DialogTitle className="text-xl">Tambah Pegawai</DialogTitle>
             </DialogHeader>
-            <form
-              onSubmit={handleAdd}
-              className="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-4 max-h-[80vh] overflow-y-auto px-1"
-            >
-              <div className="sm:col-span-2 flex justify-center mb-2">
+            <form onSubmit={handleAdd} className="space-y-4 mt-4">
+              <div className="flex justify-center mb-4">
                 <div className="relative">
                   <div className="size-24 rounded-2xl bg-muted border-2 border-dashed border-border flex items-center justify-center overflow-hidden">
                     {previewImage ? (
@@ -593,66 +557,32 @@ function PegawaiPage() {
                   />
                 </div>
               </div>
-              <div className="sm:col-span-2 space-y-1.5">
-                <Label>Nama Lengkap</Label>
-                <Input name="nama" placeholder="Masukkan nama lengkap dengan gelar..." required />
-              </div>
-              <div>
-                <Label>NIP</Label>
-                <Input name="nip" placeholder="19XXXXXXXXXXXXXXXX" required />
-              </div>
-              <div>
-                <Label>Golongan</Label>
+              <div className="space-y-3">
+                <Input name="nama" placeholder="Nama Lengkap & Gelar" required />
+                <Input name="nip" placeholder="NIP" required />
                 <Select name="golongan_id" required>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Pilih Golongan" />
-                  </SelectTrigger>
+                  <SelectTrigger><SelectValue placeholder="Pilih Golongan" /></SelectTrigger>
                   <SelectContent>
                     {masterGolongan.map((g) => (
-                      <SelectItem key={g.id} value={g.id.toString()}>
-                        {g.kode}
-                      </SelectItem>
+                      <SelectItem key={g.id} value={g.id.toString()}>{g.kode}</SelectItem>
                     ))}
                   </SelectContent>
                 </Select>
-              </div>
-              <div className="sm:col-span-2 space-y-1.5">
-                <Label>Tanggal Masuk CPNS</Label>
                 <Input name="tanggalMasuk" type="date" required />
-              </div>
-              <div className="sm:col-span-2 space-y-1.5">
-                <Label>Jabatan</Label>
                 <Select name="jabatan_id" required>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Pilih Jabatan" />
-                  </SelectTrigger>
+                  <SelectTrigger><SelectValue placeholder="Pilih Jabatan" /></SelectTrigger>
                   <SelectContent>
                     {masterJabatan.map((j) => (
-                      <SelectItem key={j.id} value={j.id.toString()}>
-                        {j.nama}
-                      </SelectItem>
+                      <SelectItem key={j.id} value={j.id.toString()}>{j.nama}</SelectItem>
                     ))}
                   </SelectContent>
                 </Select>
+                <Input name="phone" placeholder="No. Telepon" required />
+                <Input name="email" type="email" placeholder="Email" required />
               </div>
-              <div>
-                <Label>Telepon</Label>
-                <Input name="phone" placeholder="08XXXXXXXXXX" required />
-              </div>
-              <div>
-                <Label>Email</Label>
-                <Input name="email" type="email" placeholder="nama@sikapas.go.id" required />
-              </div>
-              <DialogFooter className="sm:col-span-2 mt-4">
+              <DialogFooter>
                 <Button type="submit" className="w-full" disabled={isSubmitting}>
-                  {isSubmitting ? (
-                    <>
-                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                      Menyimpan...
-                    </>
-                  ) : (
-                    "Simpan Data"
-                  )}
+                  {isSubmitting ? "Menyimpan..." : "Simpan Data"}
                 </Button>
               </DialogFooter>
             </form>
@@ -661,16 +591,13 @@ function PegawaiPage() {
 
         {/* Edit Modal */}
         <Dialog open={editOpen} onOpenChange={setEditOpen}>
-          <DialogContent className="max-w-lg w-[95vw] sm:w-full">
+          <DialogContent className="w-[90vw] sm:max-w-[450px] p-6 rounded-2xl">
             <DialogHeader>
-              <DialogTitle>Edit Data Pegawai</DialogTitle>
+              <DialogTitle className="text-xl">Edit Data Pegawai</DialogTitle>
             </DialogHeader>
             {editingPegawai && (
-              <form
-                onSubmit={handleEdit}
-                className="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-4 max-h-[80vh] overflow-y-auto px-1"
-              >
-                <div className="sm:col-span-2 flex justify-center mb-2">
+              <form onSubmit={handleEdit} className="space-y-4 mt-4">
+                <div className="flex justify-center mb-4">
                   <div className="relative">
                     <div className="size-24 rounded-2xl bg-muted border-2 border-dashed border-border flex items-center justify-center overflow-hidden">
                       {previewImage ? (
@@ -697,105 +624,53 @@ function PegawaiPage() {
                     />
                   </div>
                 </div>
-                <div className="sm:col-span-2 space-y-1.5">
-                  <Label>Nama Lengkap</Label>
+                <div className="space-y-3">
                   <Input name="nama" defaultValue={editingPegawai.nama} required />
-                </div>
-                <div>
-                  <Label>NIP</Label>
                   <Input name="nip" defaultValue={editingPegawai.nip} required />
-                </div>
-                <div>
-                  <Label>Golongan</Label>
-                  <Select
-                    name="golongan_id"
-                    defaultValue={masterGolongan
-                      .find((g) => g.kode === editingPegawai.golongan)
-                      ?.id?.toString()}
-                    required
-                  >
-                    <SelectTrigger>
-                      <SelectValue />
-                    </SelectTrigger>
+                  <Select name="golongan_id" defaultValue={masterGolongan.find(g => g.kode === editingPegawai.golongan)?.id?.toString()} required>
+                    <SelectTrigger><SelectValue /></SelectTrigger>
                     <SelectContent>
                       {masterGolongan.map((g) => (
-                        <SelectItem key={g.id} value={g.id.toString()}>
-                          {g.kode}
-                        </SelectItem>
+                        <SelectItem key={g.id} value={g.id.toString()}>{g.kode}</SelectItem>
                       ))}
                     </SelectContent>
                   </Select>
-                </div>
-                <div className="sm:col-span-2 space-y-1.5">
-                  <Label>Tanggal Masuk CPNS</Label>
-                  <Input
-                    name="tanggalMasuk"
-                    type="date"
-                    defaultValue={editingPegawai.tanggalMasuk?.split("T")[0]}
-                    required
-                  />
-                </div>
-                <div className="sm:col-span-2 space-y-1.5">
-                  <Label>Jabatan</Label>
-                  <Select
-                    name="jabatan_id"
-                    defaultValue={masterJabatan
-                      .find((j) => j.nama === editingPegawai.jabatan)
-                      ?.id?.toString()}
-                    required
-                  >
-                    <SelectTrigger>
-                      <SelectValue />
-                    </SelectTrigger>
+                  <Input name="tanggalMasuk" type="date" defaultValue={editingPegawai.tanggalMasuk?.split("T")[0]} required />
+                  <Select name="jabatan_id" defaultValue={masterJabatan.find(j => j.nama === editingPegawai.jabatan)?.id?.toString()} required>
+                    <SelectTrigger><SelectValue /></SelectTrigger>
                     <SelectContent>
                       {masterJabatan.map((j) => (
-                        <SelectItem key={j.id} value={j.id.toString()}>
-                          {j.nama}
-                        </SelectItem>
+                        <SelectItem key={j.id} value={j.id.toString()}>{j.nama}</SelectItem>
                       ))}
                     </SelectContent>
                   </Select>
-                </div>
-                <div>
-                  <Label>Telepon</Label>
                   <Input name="phone" defaultValue={editingPegawai.phone} required />
-                </div>
-                <div>
-                  <Label>Email</Label>
                   <Input name="email" type="email" defaultValue={editingPegawai.email} required />
                 </div>
-                <DialogFooter className="sm:col-span-2 mt-4">
+                <DialogFooter>
                   <Button type="submit" className="w-full" disabled={isSubmitting}>
-                    {isSubmitting ? (
-                      <>
-                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                        Menyimpan...
-                      </>
-                    ) : (
-                      "Simpan Perubahan"
-                    )}
+                    {isSubmitting ? "Menyimpan..." : "Simpan Perubahan"}
                   </Button>
                 </DialogFooter>
               </form>
             )}
           </DialogContent>
         </Dialog>
-
         {/* Account Modal */}
         <Dialog open={accountOpen} onOpenChange={setAccountOpen}>
-          <DialogContent className="max-w-md w-[95vw] sm:w-full">
+          <DialogContent className="w-[90vw] sm:max-w-md p-6 rounded-2xl">
             <DialogHeader>
-              <div className="size-12 rounded-full bg-primary/10 flex items-center justify-center mb-4">
+              <div className="size-12 rounded-full bg-primary/10 flex items-center justify-center mb-4 mx-auto">
                 <ShieldCheckIcon className="size-6 text-primary" />
               </div>
-              <DialogTitle>Buat Akun Pegawai</DialogTitle>
-              <DialogDescription className="text-xs">
+              <DialogTitle className="text-center">Buat Akun Pegawai</DialogTitle>
+              <DialogDescription className="text-xs text-center">
                 Buat akun akses sistem untuk <strong>{targetPegawai?.nama}</strong>. NIP akan
                 digunakan sebagai username default.
               </DialogDescription>
             </DialogHeader>
             {targetPegawai && (
-              <form onSubmit={handleAccountCreate} className="space-y-4 mt-4">
+              <form onSubmit={handleAccountCreate} className="space-y-4 mt-2">
                 <div className="space-y-1.5">
                   <Label>NIP / Username</Label>
                   <div className="relative">
@@ -809,19 +684,10 @@ function PegawaiPage() {
                     <Key className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-muted-foreground" />
                     <Input value="password" disabled className="pl-10" />
                   </div>
-                  <p className="text-[10px] text-muted-foreground">
-                    Password default adalah "password". Pegawai dapat mengubahnya setelah login.
-                  </p>
                 </div>
-                <div className="p-3 rounded-lg bg-info/5 border border-info/10 text-[10px] sm:text-[11px] text-info-foreground leading-relaxed">
-                  Dengan membuat akun ini, pegawai dapat mengakses dashboard pribadi untuk memantau
-                  progres kenaikan pangkat dan KGB secara mandiri.
-                </div>
-                <DialogFooter className="mt-6">
-                  <Button type="submit" className="w-full shadow-glow">
-                    Konfirmasi Buat Akun
-                  </Button>
-                </DialogFooter>
+                <Button type="submit" className="w-full">
+                  Buat Akun
+                </Button>
               </form>
             )}
           </DialogContent>
