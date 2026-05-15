@@ -5,12 +5,14 @@ interface AuthCtx {
   user: User | null;
   login: (userData: User, token: string) => void;
   logout: () => void;
+  updateUser: (userData: User) => void;
 }
 
 const Ctx = createContext<AuthCtx>({
   user: null,
   login: () => {},
   logout: () => {},
+  updateUser: () => {},
 });
 
 export function AuthProvider({ children }: { children: ReactNode }) {
@@ -39,7 +41,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setUser(null);
   };
 
-  return <Ctx.Provider value={{ user, login, logout }}>{children}</Ctx.Provider>;
+  const updateUser = (userData: User) => {
+    localStorage.setItem("sikapas_user", JSON.stringify(userData));
+    setUser(userData);
+  };
+
+  return <Ctx.Provider value={{ user, login, logout, updateUser }}>{children}</Ctx.Provider>;
 }
 
 export const useAuth = () => useContext(Ctx);

@@ -7,9 +7,20 @@ import {
   User as UserIcon,
   ArrowRight,
   ShieldCheck,
+  FileText,
+  Info,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+  DialogFooter,
+} from "@/components/ui/dialog";
 import { useAuth } from "@/lib/auth-context";
 import { useState } from "react";
 import { toast } from "sonner";
@@ -23,6 +34,7 @@ function Login() {
   const navigate = useNavigate();
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [isTermsOpen, setIsTermsOpen] = useState(false);
   const [formData, setFormData] = useState({
     username: "",
     password: "",
@@ -114,14 +126,14 @@ function Login() {
       </div>
 
       {/* Right form */}
-      <div className="flex-1 flex items-center justify-center p-6 lg:p-12">
+      <div className="flex-1 flex items-center justify-center p-4 sm:p-6 lg:p-12">
         <div className="w-full max-w-[400px]">
-          {/* Mobile Logo */}
+          {/* Mobile/Small Screen Logo */}
           <Link
             to="/"
-            className="lg:hidden flex items-center gap-2.5 mb-10 hover:opacity-90 transition-opacity w-fit"
+            className="flex lg:hidden items-center gap-2.5 mb-8 hover:opacity-90 transition-opacity w-fit mx-auto sm:mx-0"
           >
-            <div className="size-11 shrink-0">
+            <div className="size-10 shrink-0">
               <img
                 src="/kementrian_imigrasi_sikapas.png"
                 alt="SIKAPAS Logo"
@@ -129,16 +141,16 @@ function Login() {
               />
             </div>
             <div>
-              <div className="font-bold text-xl">SIKAPAS</div>
-              <div className="text-[10px] uppercase tracking-wider text-muted-foreground">
+              <div className="font-bold text-lg">SIKAPAS</div>
+              <div className="text-[9px] uppercase tracking-wider text-muted-foreground">
                 Sistem Kepegawaian
               </div>
             </div>
           </Link>
 
-          <div className="mb-8">
-            <h2 className="text-3xl font-bold tracking-tight">Login</h2>
-            <p className="mt-2 text-muted-foreground">
+          <div className="mb-8 text-center sm:text-left">
+            <h2 className="text-2xl sm:text-3xl font-bold tracking-tight">Login</h2>
+            <p className="mt-2 text-sm sm:text-base text-muted-foreground">
               Masukkan NIP atau Username Anda untuk mengakses sistem.
             </p>
           </div>
@@ -207,7 +219,109 @@ function Login() {
                 </div>
               )}
             </Button>
+
+            <div className="pt-2 text-center">
+              <Dialog open={isTermsOpen} onOpenChange={setIsTermsOpen}>
+                <DialogTrigger asChild>
+                  <button
+                    type="button"
+                    className="text-xs text-muted-foreground hover:text-primary transition-colors flex items-center justify-center gap-1.5 mx-auto"
+                  >
+                    <FileText className="size-3.5" />
+                    Dengan masuk, Anda menyetujui <span className="underline">Syarat & Ketentuan</span>
+                  </button>
+                </DialogTrigger>
+                <DialogContent className="max-w-2xl w-[95vw] max-h-[90vh] overflow-hidden flex flex-col">
+                  <DialogHeader>
+                    <div className="flex items-center gap-2 text-primary mb-1">
+                      <ShieldCheck className="size-5" />
+                      <span className="text-[10px] font-bold uppercase tracking-wider">
+                        Security Policy
+                      </span>
+                    </div>
+                    <DialogTitle className="text-2xl">Syarat & Ketentuan Penggunaan</DialogTitle>
+                    <DialogDescription>
+                      Terakhir diperbarui: {new Date().toLocaleDateString("id-ID")}
+                    </DialogDescription>
+                  </DialogHeader>
+
+                  <div className="flex-1 overflow-y-auto pr-2 py-4 space-y-6 text-sm leading-relaxed text-muted-foreground">
+                    <section className="space-y-3">
+                      <h4 className="font-bold text-foreground flex items-center gap-2">
+                        <div className="size-6 rounded-full bg-primary/10 text-primary flex items-center justify-center text-xs">
+                          1
+                        </div>
+                        Persetujuan Penggunaan
+                      </h4>
+                      <p>
+                        Dengan mengakses dan menggunakan sistem SIKAPAS, Anda menyatakan bahwa Anda
+                        adalah personel resmi yang memiliki wewenang untuk mengakses data
+                        kepegawaian. Penggunaan akun oleh pihak lain dilarang keras.
+                      </p>Section
+                    </section>
+
+                    <section className="space-y-3">
+                      <h4 className="font-bold text-foreground flex items-center gap-2">
+                        <div className="size-6 rounded-full bg-primary/10 text-primary flex items-center justify-center text-xs">
+                          2
+                        </div>
+                        Kerahasiaan Data
+                      </h4>
+                      <p>
+                        Seluruh data yang terdapat dalam sistem ini bersifat rahasia. Anda
+                        bertanggung jawab penuh untuk menjaga kerahasiaan kredensial login Anda dan
+                        dilarang menyebarluaskan data pegawai kepada pihak yang tidak berkepentingan
+                        sesuai dengan UU Pelindungan Data Pribadi.
+                      </p>
+                    </section>
+
+                    <section className="space-y-3">
+                      <h4 className="font-bold text-foreground flex items-center gap-2">
+                        <div className="size-6 rounded-full bg-primary/10 text-primary flex items-center justify-center text-xs">
+                          3
+                        </div>
+                        Validitas Informasi
+                      </h4>
+                      <p>
+                        Pegawai bertanggung jawab atas validitas dokumen yang diunggah. Pemalsuan
+                        dokumen atau input data yang sengaja dikelirukan dapat dikenakan sanksi
+                        disiplin sesuai dengan peraturan perundang-undangan yang berlaku.
+                      </p>
+                    </section>
+
+                    <section className="space-y-3">
+                      <h4 className="font-bold text-foreground flex items-center gap-2">
+                        <div className="size-6 rounded-full bg-primary/10 text-primary flex items-center justify-center text-xs">
+                          4
+                        </div>
+                        Audit & Monitoring
+                      </h4>
+                      <p>
+                        Sistem melakukan pencatatan (logging) terhadap setiap aktivitas yang Anda
+                        lakukan. Hal ini bertujuan untuk keperluan audit keamanan dan transparansi
+                        pengelolaan data kepegawaian.
+                      </p>
+                    </section>
+
+                    <div className="p-4 rounded-xl bg-info/5 border border-info/20 flex gap-3">
+                      <Info className="size-5 text-info shrink-0 mt-0.5" />
+                      <p className="text-xs text-foreground leading-relaxed font-medium">
+                        Jika Anda menemukan celah keamanan atau aktivitas mencurigakan, segera
+                        laporkan kepada tim IT Support atau Admin Kepegawaian pusat.
+                      </p>
+                    </div>
+                  </div>
+
+                  <DialogFooter className="pt-4 border-t">
+                    <Button onClick={() => setIsTermsOpen(false)} className="w-full sm:w-auto">
+                      Saya Mengerti & Setuju
+                    </Button>
+                  </DialogFooter>
+                </DialogContent>
+              </Dialog>
+            </div>
           </form>
+
         </div>
       </div>
     </div>
