@@ -17,7 +17,6 @@ export interface Pegawai {
   nama: string;
   jabatan: string;
   golongan: string;
-  unitKerja: string;
   email: string;
   phone: string;
   tmtPangkat: string; // ISO date

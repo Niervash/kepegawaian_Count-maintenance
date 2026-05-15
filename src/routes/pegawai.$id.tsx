@@ -108,8 +108,8 @@ function DetailPegawai() {
                 {p.phone}
               </div>
               <div className="flex items-center gap-3 text-muted-foreground">
-                <MapPin className="size-4" />
-                {p.unitKerja}
+                <Briefcase className="size-4" />
+                {p.jabatan}
               </div>
               <div className="flex items-center gap-3 text-muted-foreground">
                 <Award className="size-4" />

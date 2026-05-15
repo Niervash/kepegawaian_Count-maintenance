@@ -1,5 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { AppShell } from "@/components/app-shell";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -42,7 +42,6 @@ import {
   Trash2,
   Mail,
   Phone,
-  MapPin,
   Award,
   Calendar,
   Wallet,
@@ -51,6 +50,8 @@ import {
   ShieldCheck as ShieldCheckIcon,
   Clock,
   Briefcase,
+  Camera,
+  Loader2,
 } from "lucide-react";
 import { toast } from "sonner";
 import { useEffect } from "react";
@@ -61,11 +62,11 @@ function PegawaiPage() {
   const { user } = useAuth();
   const [data, setData] = useState<Pegawai[]>([]);
   const [loading, setLoading] = useState(true);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   // Master Data States
   const [masterGolongan, setMasterGolongan] = useState<any[]>([]);
   const [masterJabatan, setMasterJabatan] = useState<any[]>([]);
-  const [masterUnit, setMasterUnit] = useState<any[]>([]);
 
   const [q, setQ] = useState("");
   const [addOpen, setAddOpen] = useState(false);
@@ -78,25 +79,25 @@ function PegawaiPage() {
 
   const [filters, setFilters] = useState({
     golongan: "all",
-    unit: "all",
     status: "all",
   });
+
+  const [previewImage, setPreviewImage] = useState<string | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const isAdmin = user?.role === "admin";
 
   const fetchData = async () => {
     try {
-      const [pegawaiRes, golRes, jabRes, unitRes] = await Promise.all([
+      const [pegawaiRes, golRes, jabRes] = await Promise.all([
         api.get("/pegawai"),
         api.get("/master/golongan"),
         api.get("/master/jabatan"),
-        api.get("/master/unit-kerja"),
       ]);
 
       if (pegawaiRes.data.success) setData(pegawaiRes.data.data);
       if (golRes.data.success) setMasterGolongan(golRes.data.data);
       if (jabRes.data.success) setMasterJabatan(golRes.data.data);
-      if (unitRes.data.success) setMasterUnit(unitRes.data.data);
     } catch (error) {
       console.error("Gagal mengambil data pegawai:", error);
     } finally {
@@ -134,14 +135,26 @@ function PegawaiPage() {
   };
 
   const filtered = data.filter((p) => {
-    const matchSearch = [p.nama, p.nip, p.jabatan, p.unitKerja].some((s) =>
-      s.toLowerCase().includes(q.toLowerCase()),
+    const matchSearch = [p.nama, p.nip, p.jabatan].some((s) =>
+      s?.toLowerCase().includes(q.toLowerCase()),
     );
     const matchGolongan = filters.golongan === "all" || p.golongan === filters.golongan;
-    const matchUnit = filters.unit === "all" || p.unitKerja === filters.unit;
     const matchStatus = filters.status === "all" || p.status === filters.status;
-    return matchSearch && matchGolongan && matchUnit && matchStatus;
+    return matchSearch && matchGolongan && matchStatus;
   });
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setPreviewImage(reader.result as string);
+      };
+      reader.readAsDataURL(file);
+    } else {
+      setPreviewImage(null);
+    }
+  };
 
   const handleAdd = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -150,29 +163,38 @@ function PegawaiPage() {
     const tmtP = (f.get("tmtPangkat") as string) || lastPangkat(entryDate);
     const tmtK = (f.get("tmtKgb") as string) || lastKgb(entryDate);
 
-    const newPegawai = {
-      nip: f.get("nip") as string,
-      nama: f.get("nama") as string,
-      jabatan_id: f.get("jabatan_id") as string,
-      golongan_id: f.get("golongan_id") as string,
-      unit_kerja_id: f.get("unit_kerja_id") as string,
-      email: f.get("email") as string,
-      phone: f.get("phone") as string,
-      tanggalMasuk: entryDate,
-      tmtPangkat: tmtP,
-      tmtKgb: tmtK,
-      status: "aktif",
-    };
+    const formData = new FormData();
+    formData.append("nip", f.get("nip") as string);
+    formData.append("nama", f.get("nama") as string);
+    formData.append("jabatan_id", f.get("jabatan_id") as string);
+    formData.append("golongan_id", f.get("golongan_id") as string);
+    formData.append("email", f.get("email") as string);
+    formData.append("phone", f.get("phone") as string);
+    formData.append("tanggalMasuk", entryDate);
+    formData.append("tmtPangkat", tmtP);
+    formData.append("tmtKgb", tmtK);
+    formData.append("status", "aktif");
 
+    const avatarFile = fileInputRef.current?.files?.[0];
+    if (avatarFile) {
+      formData.append("avatar", avatarFile);
+    }
+
+    setIsSubmitting(true);
     try {
-      const response = await api.post("/pegawai", newPegawai);
+      const response = await api.post("/pegawai", formData, {
+        headers: { "Content-Type": "multipart/form-data" },
+      });
       if (response.data.success) {
         setData((d) => [response.data.data, ...d]);
         setAddOpen(false);
+        setPreviewImage(null);
         toast.success("Pegawai berhasil ditambahkan");
       }
     } catch (error: any) {
       toast.error(error.response?.data?.message || "Gagal menambah pegawai");
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -182,35 +204,50 @@ function PegawaiPage() {
     const f = new FormData(e.currentTarget);
     const entryDate = f.get("tanggalMasuk") as string;
 
-    const updated = {
-      nip: f.get("nip") as string,
-      nama: f.get("nama") as string,
-      jabatan_id: f.get("jabatan_id") as string,
-      golongan_id: f.get("golongan_id") as string,
-      unit_kerja_id: f.get("unit_kerja_id") as string,
-      email: f.get("email") as string,
-      phone: f.get("phone") as string,
-      tanggalMasuk: entryDate,
-      tmtPangkat: (f.get("tmtPangkat") as string) || editingPegawai.tmtPangkat,
-      tmtKgb: (f.get("tmtKgb") as string) || editingPegawai.tmtKgb,
-    };
+    const formData = new FormData();
+    formData.append("nip", f.get("nip") as string);
+    formData.append("nama", f.get("nama") as string);
+    formData.append("jabatan_id", f.get("jabatan_id") as string);
+    formData.append("golongan_id", f.get("golongan_id") as string);
+    formData.append("email", f.get("email") as string);
+    formData.append("phone", f.get("phone") as string);
+    formData.append("tanggalMasuk", entryDate);
+    formData.append("tmtPangkat", (f.get("tmtPangkat") as string) || editingPegawai.tmtPangkat);
+    formData.append("tmtKgb", (f.get("tmtKgb") as string) || editingPegawai.tmtKgb);
 
+    const avatarFile = fileInputRef.current?.files?.[0];
+    if (avatarFile) {
+      formData.append("avatar", avatarFile);
+    }
+
+    setIsSubmitting(true);
     try {
-      const response = await api.put(`/pegawai/${editingPegawai.id}`, updated);
+      const response = await api.put(`/pegawai/${editingPegawai.id}`, formData, {
+        headers: { "Content-Type": "multipart/form-data" },
+      });
       if (response.data.success) {
         setData((d) => d.map((p) => (p.id === editingPegawai.id ? response.data.data : p)));
         setEditOpen(false);
         setEditingPegawai(null);
+        setPreviewImage(null);
         toast.success("Data pegawai berhasil diperbarui");
       }
     } catch (error: any) {
       toast.error(error.response?.data?.message || "Gagal memperbarui data");
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
   const openEditModal = (p: Pegawai) => {
     setEditingPegawai(p);
+    setPreviewImage(p.avatar ? `http://localhost:5000${p.avatar}` : null);
     setEditOpen(true);
+  };
+
+  const openAddModal = () => {
+    setPreviewImage(null);
+    setAddOpen(true);
   };
 
   const openViewModal = (p: Pegawai) => {
@@ -284,9 +321,7 @@ function PegawaiPage() {
                         <Button
                           variant="ghost"
                           size="sm"
-                          onClick={() =>
-                            setFilters({ golongan: "all", unit: "all", status: "all" })
-                          }
+                          onClick={() => setFilters({ golongan: "all", status: "all" })}
                           className="h-7 text-xs"
                         >
                           Reset
@@ -322,7 +357,7 @@ function PegawaiPage() {
                 {isAdmin && (
                   <Button
                     className="shadow-glow flex-1 sm:flex-none w-full sm:w-auto"
-                    onClick={() => setAddOpen(true)}
+                    onClick={openAddModal}
                   >
                     <Plus className="size-4 mr-2" />{" "}
                     <span className="sm:inline">Tambah Pegawai</span>
@@ -353,8 +388,18 @@ function PegawaiPage() {
                   <tr key={p.id} className="border-t border-border hover:bg-muted/30">
                     <td className="px-5 py-3.5">
                       <div className="flex items-center gap-3">
-                        <div className="size-9 rounded-full bg-gradient-primary flex items-center justify-center text-white text-xs font-semibold">
-                          {p.nama.charAt(0)}
+                        <div className="size-9 rounded-full bg-muted flex items-center justify-center text-xs font-semibold overflow-hidden">
+                          {p.avatar ? (
+                            <img
+                              src={`http://localhost:5000${p.avatar}`}
+                              alt={p.nama}
+                              className="size-full object-cover"
+                            />
+                          ) : (
+                            <div className="size-full bg-gradient-primary flex items-center justify-center text-white">
+                              {p.nama.charAt(0)}
+                            </div>
+                          )}
                         </div>
                         <div>
                           <div className="font-medium text-xs">{p.nama}</div>
@@ -434,8 +479,18 @@ function PegawaiPage() {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-4 max-h-[80vh] overflow-y-auto pr-2">
                 <div className="space-y-4">
                   <div className="flex items-center gap-4 p-4 rounded-2xl bg-muted/30">
-                    <div className="size-16 rounded-xl bg-gradient-primary flex items-center justify-center text-white text-2xl font-bold shrink-0">
-                      {viewingPegawai.nama.charAt(0)}
+                    <div className="size-16 rounded-xl bg-muted border border-border flex items-center justify-center text-white text-2xl font-bold shrink-0 overflow-hidden">
+                      {viewingPegawai.avatar ? (
+                        <img
+                          src={`http://localhost:5000${viewingPegawai.avatar}`}
+                          alt={viewingPegawai.nama}
+                          className="size-full object-cover"
+                        />
+                      ) : (
+                        <div className="size-full bg-gradient-primary flex items-center justify-center text-white">
+                          {viewingPegawai.nama.charAt(0)}
+                        </div>
+                      )}
                     </div>
                     <div className="min-w-0">
                       <div className="font-bold text-base truncate">{viewingPegawai.nama}</div>
@@ -455,10 +510,6 @@ function PegawaiPage() {
                     <div className="flex items-center gap-2 text-muted-foreground truncate">
                       <Phone className="size-4 shrink-0" />
                       {viewingPegawai.phone}
-                    </div>
-                    <div className="flex items-center gap-2 text-muted-foreground truncate">
-                      <MapPin className="size-4 shrink-0" />
-                      {viewingPegawai.unitKerja}
                     </div>
                     <div className="flex items-center gap-2 text-muted-foreground truncate">
                       <Briefcase className="size-4 shrink-0" />
@@ -515,6 +566,33 @@ function PegawaiPage() {
               onSubmit={handleAdd}
               className="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-4 max-h-[80vh] overflow-y-auto px-1"
             >
+              <div className="sm:col-span-2 flex justify-center mb-2">
+                <div className="relative">
+                  <div className="size-24 rounded-2xl bg-muted border-2 border-dashed border-border flex items-center justify-center overflow-hidden">
+                    {previewImage ? (
+                      <img src={previewImage} className="size-full object-cover" />
+                    ) : (
+                      <Camera className="size-8 text-muted-foreground" />
+                    )}
+                  </div>
+                  <Button
+                    type="button"
+                    size="icon"
+                    variant="secondary"
+                    className="absolute -bottom-2 -right-2 size-8 rounded-full shadow-md"
+                    onClick={() => fileInputRef.current?.click()}
+                  >
+                    <Plus className="size-4" />
+                  </Button>
+                  <input
+                    type="file"
+                    ref={fileInputRef}
+                    className="hidden"
+                    accept="image/*"
+                    onChange={handleFileChange}
+                  />
+                </div>
+              </div>
               <div className="sm:col-span-2 space-y-1.5">
                 <Label>Nama Lengkap</Label>
                 <Input name="nama" placeholder="Masukkan nama lengkap dengan gelar..." required />
@@ -557,21 +635,6 @@ function PegawaiPage() {
                   </SelectContent>
                 </Select>
               </div>
-              <div className="sm:col-span-2 space-y-1.5">
-                <Label>Unit Kerja</Label>
-                <Select name="unit_kerja_id" required>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Pilih Unit Kerja" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {masterUnit.map((u) => (
-                      <SelectItem key={u.id} value={u.id.toString()}>
-                        {u.nama}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
               <div>
                 <Label>Telepon</Label>
                 <Input name="phone" placeholder="08XXXXXXXXXX" required />
@@ -581,8 +644,15 @@ function PegawaiPage() {
                 <Input name="email" type="email" placeholder="nama@sikapas.go.id" required />
               </div>
               <DialogFooter className="sm:col-span-2 mt-4">
-                <Button type="submit" className="w-full">
-                  Simpan Data
+                <Button type="submit" className="w-full" disabled={isSubmitting}>
+                  {isSubmitting ? (
+                    <>
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                      Menyimpan...
+                    </>
+                  ) : (
+                    "Simpan Data"
+                  )}
                 </Button>
               </DialogFooter>
             </form>
@@ -600,6 +670,33 @@ function PegawaiPage() {
                 onSubmit={handleEdit}
                 className="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-4 max-h-[80vh] overflow-y-auto px-1"
               >
+                <div className="sm:col-span-2 flex justify-center mb-2">
+                  <div className="relative">
+                    <div className="size-24 rounded-2xl bg-muted border-2 border-dashed border-border flex items-center justify-center overflow-hidden">
+                      {previewImage ? (
+                        <img src={previewImage} className="size-full object-cover" />
+                      ) : (
+                        <Camera className="size-8 text-muted-foreground" />
+                      )}
+                    </div>
+                    <Button
+                      type="button"
+                      size="icon"
+                      variant="secondary"
+                      className="absolute -bottom-2 -right-2 size-8 rounded-full shadow-md"
+                      onClick={() => fileInputRef.current?.click()}
+                    >
+                      <Pencil className="size-4" />
+                    </Button>
+                    <input
+                      type="file"
+                      ref={fileInputRef}
+                      className="hidden"
+                      accept="image/*"
+                      onChange={handleFileChange}
+                    />
+                  </div>
+                </div>
                 <div className="sm:col-span-2 space-y-1.5">
                   <Label>Nama Lengkap</Label>
                   <Input name="nama" defaultValue={editingPegawai.nama} required />
@@ -659,27 +756,6 @@ function PegawaiPage() {
                     </SelectContent>
                   </Select>
                 </div>
-                <div className="sm:col-span-2 space-y-1.5">
-                  <Label>Unit Kerja</Label>
-                  <Select
-                    name="unit_kerja_id"
-                    defaultValue={masterUnit
-                      .find((u) => u.nama === editingPegawai.unitKerja)
-                      ?.id?.toString()}
-                    required
-                  >
-                    <SelectTrigger>
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {masterUnit.map((u) => (
-                        <SelectItem key={u.id} value={u.id.toString()}>
-                          {u.nama}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
                 <div>
                   <Label>Telepon</Label>
                   <Input name="phone" defaultValue={editingPegawai.phone} required />
@@ -689,8 +765,15 @@ function PegawaiPage() {
                   <Input name="email" type="email" defaultValue={editingPegawai.email} required />
                 </div>
                 <DialogFooter className="sm:col-span-2 mt-4">
-                  <Button type="submit" className="w-full">
-                    Simpan Perubahan
+                  <Button type="submit" className="w-full" disabled={isSubmitting}>
+                    {isSubmitting ? (
+                      <>
+                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                        Menyimpan...
+                      </>
+                    ) : (
+                      "Simpan Perubahan"
+                    )}
                   </Button>
                 </DialogFooter>
               </form>

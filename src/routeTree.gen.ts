@@ -22,7 +22,6 @@ import { Route as DashboardRouteImport } from './routes/dashboard'
 import { Route as ApprovalRouteImport } from './routes/approval'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as PegawaiIdRouteImport } from './routes/pegawai.$id'
-import { Route as MasterUnitKerjaRouteImport } from './routes/master.unit-kerja'
 import { Route as MasterJabatanRouteImport } from './routes/master.jabatan'
 import { Route as MasterGolonganRouteImport } from './routes/master.golongan'
 
@@ -91,11 +90,6 @@ const PegawaiIdRoute = PegawaiIdRouteImport.update({
   path: '/$id',
   getParentRoute: () => PegawaiRoute,
 } as any)
-const MasterUnitKerjaRoute = MasterUnitKerjaRouteImport.update({
-  id: '/master/unit-kerja',
-  path: '/master/unit-kerja',
-  getParentRoute: () => rootRouteImport,
-} as any)
 const MasterJabatanRoute = MasterJabatanRouteImport.update({
   id: '/master/jabatan',
   path: '/master/jabatan',
@@ -122,7 +116,6 @@ export interface FileRoutesByFullPath {
   '/reminder': typeof ReminderRoute
   '/master/golongan': typeof MasterGolonganRoute
   '/master/jabatan': typeof MasterJabatanRoute
-  '/master/unit-kerja': typeof MasterUnitKerjaRoute
   '/pegawai/$id': typeof PegawaiIdRoute
 }
 export interface FileRoutesByTo {
@@ -140,7 +133,6 @@ export interface FileRoutesByTo {
   '/reminder': typeof ReminderRoute
   '/master/golongan': typeof MasterGolonganRoute
   '/master/jabatan': typeof MasterJabatanRoute
-  '/master/unit-kerja': typeof MasterUnitKerjaRoute
   '/pegawai/$id': typeof PegawaiIdRoute
 }
 export interface FileRoutesById {
@@ -159,7 +151,6 @@ export interface FileRoutesById {
   '/reminder': typeof ReminderRoute
   '/master/golongan': typeof MasterGolonganRoute
   '/master/jabatan': typeof MasterJabatanRoute
-  '/master/unit-kerja': typeof MasterUnitKerjaRoute
   '/pegawai/$id': typeof PegawaiIdRoute
 }
 export interface FileRouteTypes {
@@ -179,7 +170,6 @@ export interface FileRouteTypes {
     | '/reminder'
     | '/master/golongan'
     | '/master/jabatan'
-    | '/master/unit-kerja'
     | '/pegawai/$id'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -197,7 +187,6 @@ export interface FileRouteTypes {
     | '/reminder'
     | '/master/golongan'
     | '/master/jabatan'
-    | '/master/unit-kerja'
     | '/pegawai/$id'
   id:
     | '__root__'
@@ -215,7 +204,6 @@ export interface FileRouteTypes {
     | '/reminder'
     | '/master/golongan'
     | '/master/jabatan'
-    | '/master/unit-kerja'
     | '/pegawai/$id'
   fileRoutesById: FileRoutesById
 }
@@ -234,7 +222,6 @@ export interface RootRouteChildren {
   ReminderRoute: typeof ReminderRoute
   MasterGolonganRoute: typeof MasterGolonganRoute
   MasterJabatanRoute: typeof MasterJabatanRoute
-  MasterUnitKerjaRoute: typeof MasterUnitKerjaRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -330,13 +317,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof PegawaiIdRouteImport
       parentRoute: typeof PegawaiRoute
     }
-    '/master/unit-kerja': {
-      id: '/master/unit-kerja'
-      path: '/master/unit-kerja'
-      fullPath: '/master/unit-kerja'
-      preLoaderRoute: typeof MasterUnitKerjaRouteImport
-      parentRoute: typeof rootRouteImport
-    }
     '/master/jabatan': {
       id: '/master/jabatan'
       path: '/master/jabatan'
@@ -380,7 +360,6 @@ const rootRouteChildren: RootRouteChildren = {
   ReminderRoute: ReminderRoute,
   MasterGolonganRoute: MasterGolonganRoute,
   MasterJabatanRoute: MasterJabatanRoute,
-  MasterUnitKerjaRoute: MasterUnitKerjaRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

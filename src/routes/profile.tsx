@@ -44,16 +44,18 @@ function Page() {
     }
 
     const formData = new FormData();
-    formData.append("photo", file);
+    formData.append("avatar", file);
+    formData.append("name", user.name);
+    formData.append("email", user.email);
 
     setUploading(true);
     try {
-      const response = await api.post("/auth/update-photo", formData, {
+      const response = await api.put("/auth/profile", formData, {
         headers: { "Content-Type": "multipart/form-data" },
       });
 
       if (response.data.success) {
-        updateUser(response.data.user);
+        updateUser(response.data.data);
         toast.success("Foto profil berhasil diperbarui");
       }
     } catch (error: any) {

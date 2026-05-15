@@ -53,15 +53,15 @@ export const generateMonthlyPDF = (pegawai: Pegawai[]) => {
   const kgbData = pegawai.map((p) => ({
     nama: p.nama,
     nip: p.nip,
-    unit: p.unitKerja,
+    jabatan: p.jabatan,
     tmtLalu: format(new Date(p.tmtKgb), "dd/MM/yyyy"),
     tmtNext: format(new Date(nextKgb(p)), "dd/MM/yyyy"),
   }));
 
   autoTable(doc, {
     startY: finalY + 20,
-    head: [["Nama", "NIP", "Unit Kerja", "TMT Terakhir", "TMT Berikutnya"]],
-    body: kgbData.map((p) => [p.nama, p.nip, p.unit, p.tmtLalu, p.tmtNext]),
+    head: [["Nama", "NIP", "Jabatan", "TMT Terakhir", "TMT Berikutnya"]],
+    body: kgbData.map((p) => [p.nama, p.nip, p.jabatan, p.tmtLalu, p.tmtNext]),
     theme: "striped",
     headStyles: { fillColor: [16, 185, 129] },
   });
@@ -117,15 +117,15 @@ export const generateKgbPDF = (pegawai: Pegawai[]) => {
     .map((p) => ({
       nama: p.nama,
       nip: p.nip,
-      unit: p.unitKerja,
+      jabatan: p.jabatan,
       tmtLalu: format(new Date(p.tmtKgb), "dd/MM/yyyy"),
       tmtNext: format(new Date(nextKgb(p)), "dd/MM/yyyy"),
     }));
 
   autoTable(doc, {
     startY: 35,
-    head: [["Nama", "NIP", "Unit Kerja", "TMT Terakhir", "TMT Berikutnya"]],
-    body: kgbData.map((p) => [p.nama, p.nip, p.unit, p.tmtLalu, p.tmtNext]),
+    head: [["Nama", "NIP", "Jabatan", "TMT Terakhir", "TMT Berikutnya"]],
+    body: kgbData.map((p) => [p.nama, p.nip, p.jabatan, p.tmtLalu, p.tmtNext]),
     theme: "striped",
     headStyles: { fillColor: [16, 185, 129] },
   });
@@ -175,7 +175,6 @@ export const exportToExcel = (pegawai: Pegawai[]) => {
     NIP: p.nip,
     Jabatan: p.jabatan,
     Golongan: p.golongan,
-    "Unit Kerja": p.unitKerja,
     Email: p.email,
     Telepon: p.phone,
     "TMT Pangkat": format(new Date(p.tmtPangkat), "dd/MM/yyyy"),
