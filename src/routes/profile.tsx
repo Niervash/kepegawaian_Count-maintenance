@@ -19,7 +19,7 @@ import {
   Upload,
   Loader2,
 } from "lucide-react";
-import api from "@/services/api";
+import api, { BASE_URL } from "@/services/api";
 
 export const Route = createFileRoute("/profile")({ component: Page });
 
@@ -91,7 +91,7 @@ function Page() {
   };
 
   const avatarUrl = user.avatar
-    ? `https://prozac-dainty-antiquely.ngrok-free.dev${user.avatar}`
+    ? `${BASE_URL}${user.avatar}`
     : null;
 
   return (

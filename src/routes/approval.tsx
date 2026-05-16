@@ -27,7 +27,7 @@ import {
   DialogTitle,
   DialogFooter,
 } from "@/components/ui/dialog";
-import api from "@/services/api";
+import api, { BASE_URL } from "@/services/api";
 
 export const Route = createFileRoute("/approval")({ component: Page });
 
@@ -106,7 +106,7 @@ function Page() {
 
   const handleDownload = () => {
     if (!selectedApproval) return;
-    const url = `http://localhost:5000${(selectedApproval as any).dokumen_url}`;
+    const url = `${BASE_URL}${(selectedApproval as any).dokumen_url}`;
     window.open(url, "_blank");
   };
 
@@ -149,7 +149,7 @@ function Page() {
                         size="icon" 
                         variant="ghost" 
                         className="h-8 w-8 text-primary"
-                        onClick={() => window.open(`http://localhost:5000${t.file_url}`, "_blank")}
+                        onClick={() => window.open(`${BASE_URL}${t.file_url}`, "_blank")}
                         title="Download Format Template"
                       >
                         <Download className="size-4" />
