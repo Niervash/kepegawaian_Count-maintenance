@@ -186,7 +186,7 @@ export function Topbar() {
                 ))
               )}
             </div>
-            {notifications.length > 0 && (
+            {notifications.length > 0 && user?.role !== "pegawai" && (
               <div className="p-2 border-t text-center">
                 <Button
                   variant="ghost"

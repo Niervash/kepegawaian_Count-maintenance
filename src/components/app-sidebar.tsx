@@ -56,6 +56,7 @@ const navItems = [
 const masterItems = [
   { to: "/master/golongan", label: "Master Golongan", icon: Shield, roles: ["admin"] },
   { to: "/master/jabatan", label: "Master Jabatan", icon: Building2, roles: ["admin"] },
+  { to: "/reminder", label: "Reminder", icon: Bell, roles: ["admin", "pimpinan"] },
 ];
 
 export function AppSidebar() {

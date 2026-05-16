@@ -274,15 +274,6 @@ function ReminderPage() {
                     </div>
                   </div>
                 </div>
-
-                <div className="mt-5 flex gap-2">
-                  <Button variant="outline" size="sm" className="w-full text-[11px] h-8">
-                    <FileText className="size-3 mr-2" /> Detail
-                  </Button>
-                  <Button size="sm" className="w-full text-[11px] h-8 shadow-glow">
-                    Siapkan Berkas <ArrowRight className="size-3 ml-2" />
-                  </Button>
-                </div>
               </CardContent>
             </Card>
           ))}
