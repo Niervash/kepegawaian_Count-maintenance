@@ -471,7 +471,6 @@ function Dashboard() {
                     <SelectContent>
                       <SelectItem value="Kenaikan Pangkat">Kenaikan Pangkat</SelectItem>
                       <SelectItem value="KGB">KGB</SelectItem>
-                      <SelectItem value="Administrasi">Administrasi</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>

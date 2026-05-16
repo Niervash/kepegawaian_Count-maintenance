@@ -31,7 +31,7 @@ import {
   type User,
 } from "@/lib/simpeg-data";
 import { useAuth } from "@/lib/auth-context";
-import api from "@/services/api";
+import api, { BASE_URL } from "@/services/api";
 import {
   Search,
   Plus,
@@ -388,7 +388,7 @@ function PegawaiPage() {
                         <div className="size-9 rounded-full bg-muted flex items-center justify-center text-xs font-semibold overflow-hidden">
                           {p.avatar ? (
                             <img
-                              src={`http://localhost:5000${p.avatar}`}
+                              src={`${BASE_URL}${p.avatar}`}
                               alt={p.nama}
                               className="size-full object-cover"
                             />

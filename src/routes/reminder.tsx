@@ -37,7 +37,7 @@ export const Route = createFileRoute("/reminder")({
 
 function ReminderPage() {
   const { user } = useAuth();
-  const [data, setData] = useState<Pegawai[]>([]);
+  const [data, setData] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
   const [filter, setFilter] = useState<"all" | "pangkat" | "kgb">("all");
@@ -50,7 +50,7 @@ function ReminderPage() {
   const fetchData = async () => {
     try {
       setLoading(true);
-      const response = await api.get("/pegawai");
+      const response = await api.get("/reminders");
       if (response.data.success) {
         setData(response.data.data);
       }
@@ -79,14 +79,14 @@ function ReminderPage() {
     setIsUpdating(true);
     try {
       const formData = new FormData();
-      // Only updating specific fields, but backend might expect full data or handled as partial
-      // Based on src/routes/pegawai.tsx, we should send what it needs
       formData.append("nip", editingPegawai.nip);
       formData.append("nama", editingPegawai.nama);
       formData.append("tmtPangkat", editForm.tmtPangkat);
       formData.append("tmtKgb", editForm.tmtKgb);
 
-      const response = await api.put(`/pegawai/${editingPegawai.id}`, formData);
+      const response = await api.put(`/pegawai/${editingPegawai.id}`, formData, {
+        headers: { "Content-Type": "multipart/form-data" },
+      });
       if (response.data.success) {
         toast.success(`Jadwal ${editingPegawai.nama} berhasil diperbarui`);
         setEditingPegawai(null);
@@ -100,41 +100,7 @@ function ReminderPage() {
   };
 
   const reminders = useMemo(() => {
-    const isPegawai = user?.role === "pegawai";
-
-    // If pegawai, only show their own
-    const filteredData = isPegawai ? data.filter((p) => p.nip === user?.nip) : data;
-
-    const items: {
-      id: string;
-      pegawai: Pegawai;
-      type: "pangkat" | "kgb";
-      date: string;
-      days: number;
-    }[] = [];
-
-    filteredData.forEach((p) => {
-      const dP = nextPangkat(p);
-      const dK = nextKgb(p);
-
-      items.push({
-        id: `${p.id}-pangkat`,
-        pegawai: p,
-        type: "pangkat",
-        date: dP,
-        days: daysUntil(dP),
-      });
-
-      items.push({
-        id: `${p.id}-kgb`,
-        pegawai: p,
-        type: "kgb",
-        date: dK,
-        days: daysUntil(dK),
-      });
-    });
-
-    return items
+    return data
       .filter((item) => {
         const matchSearch =
           item.pegawai.nama.toLowerCase().includes(search.toLowerCase()) ||
@@ -143,7 +109,7 @@ function ReminderPage() {
         return matchSearch && matchFilter;
       })
       .sort((a, b) => a.days - b.days);
-  }, [data, user, search, filter]);
+  }, [data, search, filter]);
 
   const getStatusBadge = (days: number) => {
     if (days <= 30)

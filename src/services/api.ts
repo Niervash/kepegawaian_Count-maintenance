@@ -3,7 +3,7 @@ import axios from "axios";
 const API_URL =
   import.meta.env.VITE_API_URL || "https://prozac-dainty-antiquely.ngrok-free.dev/api";
 
-export const BASE_URL = API_URL.replace("/api", "");
+export const BASE_URL = API_URL;
 
 const api = axios.create({
   baseURL: API_URL,
