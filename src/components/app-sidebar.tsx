@@ -46,6 +46,7 @@ const navItems = [
   },
   { to: "/kgb", label: "KGB", icon: Wallet, roles: ["admin", "pimpinan", "pegawai"] },
   { to: "/approval", label: "Approval Dokumen", icon: FileCheck, roles: ["admin", "pimpinan"] },
+  { to: "/reminder", label: "Reminder", icon: Bell, roles: ["admin", "pimpinan"] },
 
   { to: "/kalender", label: "Kalender", icon: Calendar, roles: ["admin", "pimpinan", "pegawai"] },
   { to: "/laporan", label: "Laporan", icon: FileBarChart, roles: ["admin", "pimpinan"] },
@@ -56,7 +57,6 @@ const navItems = [
 const masterItems = [
   { to: "/master/golongan", label: "Master Golongan", icon: Shield, roles: ["admin"] },
   { to: "/master/jabatan", label: "Master Jabatan", icon: Building2, roles: ["admin"] },
-  { to: "/reminder", label: "Reminder", icon: Bell, roles: ["admin", "pimpinan"] },
 ];
 
 export function AppSidebar() {

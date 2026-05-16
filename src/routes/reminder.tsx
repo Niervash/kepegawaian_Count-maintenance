@@ -5,6 +5,15 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+  DialogFooter,
+} from "@/components/ui/dialog";
+import { Label } from "@/components/ui/label";
 import { type Pegawai, nextPangkat, nextKgb, daysUntil } from "@/lib/simpeg-data";
 import { useAuth } from "@/lib/auth-context";
 import api from "@/services/api";
@@ -18,7 +27,9 @@ import {
   Clock,
   AlertCircle,
   FileText,
+  Pencil,
 } from "lucide-react";
+import { toast } from "sonner";
 
 export const Route = createFileRoute("/reminder")({
   component: ReminderPage,
@@ -31,21 +42,62 @@ function ReminderPage() {
   const [search, setSearch] = useState("");
   const [filter, setFilter] = useState<"all" | "pangkat" | "kgb">("all");
 
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const response = await api.get("/pegawai");
-        if (response.data.success) {
-          setData(response.data.data);
-        }
-      } catch (error) {
-        console.error("Gagal mengambil data reminder:", error);
-      } finally {
-        setLoading(false);
+  // Quick Edit States
+  const [editingPegawai, setEditingPegawai] = useState<Pegawai | null>(null);
+  const [editForm, setEditForm] = useState({ tmtPangkat: "", tmtKgb: "" });
+  const [isUpdating, setIsUpdating] = useState(false);
+
+  const fetchData = async () => {
+    try {
+      setLoading(true);
+      const response = await api.get("/pegawai");
+      if (response.data.success) {
+        setData(response.data.data);
       }
-    };
+    } catch (error) {
+      console.error("Gagal mengambil data reminder:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
     fetchData();
   }, []);
+
+  const handleOpenEdit = (p: Pegawai) => {
+    setEditingPegawai(p);
+    setEditForm({
+      tmtPangkat: p.tmtPangkat ? p.tmtPangkat.split("T")[0] : "",
+      tmtKgb: p.tmtKgb ? p.tmtKgb.split("T")[0] : "",
+    });
+  };
+
+  const handleUpdateSchedule = async () => {
+    if (!editingPegawai) return;
+
+    setIsUpdating(true);
+    try {
+      const formData = new FormData();
+      // Only updating specific fields, but backend might expect full data or handled as partial
+      // Based on src/routes/pegawai.tsx, we should send what it needs
+      formData.append("nip", editingPegawai.nip);
+      formData.append("nama", editingPegawai.nama);
+      formData.append("tmtPangkat", editForm.tmtPangkat);
+      formData.append("tmtKgb", editForm.tmtKgb);
+
+      const response = await api.put(`/pegawai/${editingPegawai.id}`, formData);
+      if (response.data.success) {
+        toast.success(`Jadwal ${editingPegawai.nama} berhasil diperbarui`);
+        setEditingPegawai(null);
+        fetchData(); // Refresh list
+      }
+    } catch (error) {
+      toast.error("Gagal memperbarui jadwal");
+    } finally {
+      setIsUpdating(false);
+    }
+  };
 
   const reminders = useMemo(() => {
     const isPegawai = user?.role === "pegawai";
@@ -274,6 +326,19 @@ function ReminderPage() {
                     </div>
                   </div>
                 </div>
+
+                {user?.role !== "pegawai" && (
+                  <div className="mt-4 pt-4 border-t border-border/50">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="w-full text-[11px] h-8 hover:bg-primary/5 hover:text-primary hover:border-primary/30 transition-all"
+                      onClick={() => handleOpenEdit(r.pegawai)}
+                    >
+                      <Pencil className="size-3 mr-2" /> Sesuaikan Jadwal
+                    </Button>
+                  </div>
+                )}
               </CardContent>
             </Card>
           ))}
@@ -290,6 +355,68 @@ function ReminderPage() {
             </div>
           )}
         </div>
+
+        {/* Quick Edit Dialog */}
+        <Dialog open={!!editingPegawai} onOpenChange={(open) => !open && setEditingPegawai(null)}>
+          <DialogContent className="w-[90vw] sm:max-w-[400px] p-6 rounded-2xl">
+            <DialogHeader>
+              <DialogTitle>Sesuaikan Jadwal</DialogTitle>
+              <DialogDescription>
+                Ubah TMT terakhir untuk menyesuaikan perhitungan otomatis berikutnya.
+              </DialogDescription>
+            </DialogHeader>
+
+            <div className="space-y-4 py-4">
+              <div className="p-3 rounded-lg bg-muted/50 border border-border mb-2">
+                <p className="text-sm font-bold">{editingPegawai?.nama}</p>
+                <p className="text-[10px] text-muted-foreground font-mono">{editingPegawai?.nip}</p>
+              </div>
+
+              <div className="space-y-2">
+                <Label className="text-xs font-bold uppercase tracking-wider text-muted-foreground">
+                  TMT Pangkat Terakhir
+                </Label>
+                <div className="relative">
+                  <Calendar className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-muted-foreground" />
+                  <Input
+                    type="date"
+                    className="pl-10"
+                    value={editForm.tmtPangkat}
+                    onChange={(e) => setEditForm({ ...editForm, tmtPangkat: e.target.value })}
+                  />
+                </div>
+              </div>
+
+              <div className="space-y-2">
+                <Label className="text-xs font-bold uppercase tracking-wider text-muted-foreground">
+                  TMT KGB Terakhir
+                </Label>
+                <div className="relative">
+                  <Wallet className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-muted-foreground" />
+                  <Input
+                    type="date"
+                    className="pl-10"
+                    value={editForm.tmtKgb}
+                    onChange={(e) => setEditForm({ ...editForm, tmtKgb: e.target.value })}
+                  />
+                </div>
+              </div>
+            </div>
+
+            <DialogFooter>
+              <Button
+                variant="ghost"
+                onClick={() => setEditingPegawai(null)}
+                disabled={isUpdating}
+              >
+                Batal
+              </Button>
+              <Button onClick={handleUpdateSchedule} disabled={isUpdating} className="shadow-glow">
+                {isUpdating ? "Menyimpan..." : "Simpan Perubahan"}
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
       </div>
     </AppShell>
   );
