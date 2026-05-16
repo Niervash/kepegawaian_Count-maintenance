@@ -83,14 +83,14 @@ function Dashboard() {
     }
     const formData = new FormData();
     formData.append("type", submissionData.type);
-    submissionData.files.forEach((file) => {
-      formData.append("files", file);
-    });
+    // Backend expects single 'dokumen'
+    formData.append("dokumen", submissionData.files[0]);
+    
     try {
       await api.post("/approvals", formData, {
         headers: { "Content-Type": "multipart/form-data" },
       });
-      toast.success("Dokumen-dokumen berhasil dikirim ke Admin");
+      toast.success("Dokumen berhasil dikirim ke Admin");
       setIsSubmitDocOpen(false);
       setSubmissionData({ type: "Kenaikan Pangkat", files: [] });
     } catch (error) {
@@ -137,10 +137,8 @@ function Dashboard() {
           const me = pegawaiList.find((p: any) => p.nip === user?.nip);
           setMyData(me || null);
 
-          // Filter my own approvals
-          const myApps = responses[2].data.data.filter(
-            (a: any) => a.pegawai_id === (user as any).id,
-          );
+          // Backend already filters approvals for pegawai role
+          const myApps = responses[2].data.data;
           setStats({
             myApprovalsCount: myApps.length,
           });
@@ -473,6 +471,7 @@ function Dashboard() {
                     <SelectContent>
                       <SelectItem value="Kenaikan Pangkat">Kenaikan Pangkat</SelectItem>
                       <SelectItem value="KGB">KGB</SelectItem>
+                      <SelectItem value="Administrasi">Administrasi</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
